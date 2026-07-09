@@ -1,16 +1,14 @@
 import { Router } from 'express';
 import { store } from '../data/store.js';
+import { LATIN_PASSWORD_RE, PHONE_RE } from '../utils/validators.js';
 
 const router = Router();
 
 const ROLE_LABELS = { admin: 'Администратор', doctor: 'Врач', nurse: 'Медсестра' };
 
-// Same rule for every role: password must be typed in English/Latin characters.
-const LATIN_PASSWORD_RE = /^[A-Za-z0-9!@#$%^&*()_\-+=.,:;'"~`<>?/\\|{}[\]]+$/;
-const PHONE_RE = /^\+?[0-9\s\-()]{7,}$/;
-
-// Staff with a `phone`/`password` set in seed data require an exact credential match.
-// Staff without one stay in demo mode: any correctly-formatted phone/password logs in.
+// If the entered phone belongs to a staff member with a configured password, that
+// exact password is required. Any other phone falls back to demo mode, picking an
+// on-duty staff member of the chosen role that has no configured credentials.
 router.post('/login', (req, res) => {
   const { role, phone, password } = req.body || {};
   if (!ROLE_LABELS[role]) return res.status(400).json({ error: 'Unknown role' });
@@ -19,16 +17,16 @@ router.post('/login', (req, res) => {
     return res.status(400).json({ error: 'Пароль должен быть на английском языке (латиница, без кириллицы)' });
   }
 
-  const staff = store.getStaff();
-  const roleStaff = staff.filter((s) => s.role === role);
-  const withCredentials = roleStaff.filter((s) => s.password);
+  const roleStaff = store.getStaff().filter((s) => s.role === role);
+  const byPhone = roleStaff.find((s) => s.phone === phone);
 
   let user;
-  if (withCredentials.length > 0) {
-    user = withCredentials.find((s) => s.phone === phone && s.password === password);
-    if (!user) return res.status(401).json({ error: 'Неверный номер телефона или пароль' });
+  if (byPhone && byPhone.password) {
+    if (byPhone.password !== password) return res.status(401).json({ error: 'Неверный номер телефона или пароль' });
+    user = byPhone;
   } else {
-    user = roleStaff.find((s) => s.onDuty) || roleStaff[0] || { id: null, name: ROLE_LABELS[role] };
+    const demoEligible = roleStaff.filter((s) => !s.password);
+    user = demoEligible.find((s) => s.onDuty) || demoEligible[0] || { id: null, name: ROLE_LABELS[role] };
   }
 
   res.json({

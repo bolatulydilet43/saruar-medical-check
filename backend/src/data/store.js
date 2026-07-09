@@ -10,6 +10,10 @@ const state = {
 
 export const store = {
   getStaff: () => state.staff,
+  addStaff: (member) => {
+    state.staff.push(member);
+    return member;
+  },
 
   getPatients: () => state.patients,
   getPatient: (id) => state.patients.find((p) => p.id === id),

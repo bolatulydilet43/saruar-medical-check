@@ -25,6 +25,7 @@ export const api = {
     request('/auth/login', { method: 'POST', body: JSON.stringify({ role, phone, password }) }),
 
   getStaff: () => request('/staff'),
+  createStaff: (payload) => request('/staff', { method: 'POST', body: JSON.stringify(payload) }),
 
   getPatients: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
