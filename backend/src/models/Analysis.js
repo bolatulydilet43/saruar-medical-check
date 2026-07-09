@@ -6,6 +6,9 @@ const TYPE_LABELS = {
   ecg: 'ЭКГ',
   bp: 'Артериальное давление',
   us: 'УЗИ',
+  sugar: 'Сахар',
+  biochem: 'Биохимия',
+  hormones: 'Гормоны',
 };
 
 // Builds a stored analysis record from a raw analysis-entry-form payload.
@@ -38,6 +41,12 @@ export function createAnalysis({ analysisType, by, values = {}, urine, rhythm, h
     record.conclusion = conclusion || '';
   } else if (analysisType === 'us') {
     record.conclusion = conclusion || '';
+  } else if (analysisType === 'sugar') {
+    record.values = { glucose: values.glucose };
+  } else if (analysisType === 'biochem') {
+    record.values = { totalProtein: values.totalProtein, creatinine: values.creatinine, alt: values.alt, ast: values.ast };
+  } else if (analysisType === 'hormones') {
+    record.values = { tsh: values.tsh, t3: values.t3, t4: values.t4, prolactin: values.prolactin };
   }
 
   return record;

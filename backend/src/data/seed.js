@@ -1,13 +1,13 @@
 // Seed data for the in-memory store. Mirrors the original design mockup's dataset.
 export const STAFF = [
-  { id: 'd1', name: 'Др. Елена Соколова', role: 'doctor', specialty: 'Кардиолог', color: '#1D9E75', onDuty: true },
+  { id: 'd1', name: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', role: 'doctor', specialty: 'Кардиолог', color: '#1D9E75', onDuty: true },
   { id: 'd2', name: 'Др. Игорь Петров', role: 'doctor', specialty: 'Терапевт', color: '#185FA5', onDuty: true },
   { id: 'd3', name: 'Др. Мария Волкова', role: 'doctor', specialty: 'Эндокринолог', color: '#B45FB4', onDuty: false },
   { id: 'n1', name: 'Анна Кузнецова', role: 'nurse', specialty: 'Процедурная медсестра', color: '#1D9E75', onDuty: true },
   { id: 'n2', name: 'Ольга Смирнова', role: 'nurse', specialty: 'Постовая медсестра', color: '#185FA5', onDuty: true },
   // Real credentials — this admin account requires an exact phone/password match to log in
   // (see auth.routes.js). Other staff below have no `phone`/`password` and stay in demo mode.
-  { id: 'a1', name: 'Сергей Морозов', role: 'admin', specialty: 'Администратор', color: '#6B7280', onDuty: true,
+  { id: 'a1', name: 'Әділет Болатұлы', role: 'admin', specialty: 'Администратор', color: '#6B7280', onDuty: true,
     phone: '+77070060501', password: 'REDACTED-ROTATED' },
 ];
 
@@ -25,7 +25,7 @@ export const PATIENTS = [
         values: { systolic: 148, diastolic: 94, pulse: 88 } },
     ],
     diagnoses: [
-      { id: 'dg1', date: '2026-07-08', doctor: 'Др. Елена Соколова', text: 'Гипертоническая болезнь II ст., анемия лёгкой степени.',
+      { id: 'dg1', date: '2026-07-08', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', text: 'Гипертоническая болезнь II ст., анемия лёгкой степени.',
         confirmed: true,
         prescriptions: [
           { medication: 'Лизиноприл', dosage: '10 мг', frequency: '1 раз в день', duration: '14 дней' },
@@ -33,7 +33,7 @@ export const PATIENTS = [
         ] },
     ],
     appointments: [
-      { id: 'ap1', date: '2026-07-10', time: '09:30', doctor: 'Др. Елена Соколова', type: 'Осмотр кардиолога' },
+      { id: 'ap1', date: '2026-07-10', time: '09:30', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', type: 'Осмотр кардиолога' },
     ],
   },
   {
@@ -76,7 +76,7 @@ export const PATIENTS = [
     ],
     diagnoses: [],
     appointments: [
-      { id: 'ap1', date: '2026-07-10', time: '10:00', doctor: 'Др. Елена Соколова', type: 'Первичный осмотр' },
+      { id: 'ap1', date: '2026-07-10', time: '10:00', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', type: 'Первичный осмотр' },
     ],
   },
   {
@@ -157,21 +157,21 @@ export const PATIENTS = [
     ],
     diagnoses: [],
     appointments: [
-      { id: 'ap1', date: '2026-07-10', time: '08:30', doctor: 'Др. Елена Соколова', type: 'Экстренная консультация' },
+      { id: 'ap1', date: '2026-07-10', time: '08:30', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', type: 'Экстренная консультация' },
     ],
   },
 ];
 
 export const APPOINTMENTS_WEEK = [
-  { id: 'w1', date: '2026-07-06', time: '09:00', patient: 'Виктор Лебедев', doctor: 'Др. Елена Соколова', color: '#1D9E75' },
+  { id: 'w1', date: '2026-07-06', time: '09:00', patient: 'Виктор Лебедев', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', color: '#1D9E75' },
   { id: 'w2', date: '2026-07-06', time: '11:00', patient: 'Наталья Орлова', doctor: 'Др. Мария Волкова', color: '#B45FB4' },
-  { id: 'w3', date: '2026-07-07', time: '10:00', patient: 'Мария Крылова', doctor: 'Др. Елена Соколова', color: '#1D9E75' },
+  { id: 'w3', date: '2026-07-07', time: '10:00', patient: 'Мария Крылова', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', color: '#1D9E75' },
   { id: 'w4', date: '2026-07-08', time: '14:00', patient: 'Екатерина Зайцева', doctor: 'Др. Мария Волкова', color: '#B45FB4' },
   { id: 'w5', date: '2026-07-09', time: '09:30', patient: 'Юрий Соловьёв', doctor: 'Др. Игорь Петров', color: '#185FA5' },
   { id: 'w6', date: '2026-07-09', time: '13:00', patient: 'Ирина Никитина', doctor: 'Др. Игорь Петров', color: '#185FA5' },
-  { id: 'w7', date: '2026-07-10', time: '08:30', patient: 'Светлана Гусева', doctor: 'Др. Елена Соколова', color: '#1D9E75' },
-  { id: 'w8', date: '2026-07-10', time: '09:30', patient: 'Виктор Лебедев', doctor: 'Др. Елена Соколова', color: '#1D9E75' },
-  { id: 'w9', date: '2026-07-10', time: '10:00', patient: 'Мария Крылова', doctor: 'Др. Елена Соколова', color: '#1D9E75' },
+  { id: 'w7', date: '2026-07-10', time: '08:30', patient: 'Светлана Гусева', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', color: '#1D9E75' },
+  { id: 'w8', date: '2026-07-10', time: '09:30', patient: 'Виктор Лебедев', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', color: '#1D9E75' },
+  { id: 'w9', date: '2026-07-10', time: '10:00', patient: 'Мария Крылова', doctor: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', color: '#1D9E75' },
   { id: 'w10', date: '2026-07-10', time: '11:00', patient: 'Наталья Орлова', doctor: 'Др. Мария Волкова', color: '#B45FB4' },
   { id: 'w11', date: '2026-07-11', time: '14:30', patient: 'Екатерина Зайцева', doctor: 'Др. Мария Волкова', color: '#B45FB4' },
   { id: 'w12', date: '2026-07-13', time: '09:00', patient: 'Юрий Соловьёв', doctor: 'Др. Игорь Петров', color: '#185FA5' },

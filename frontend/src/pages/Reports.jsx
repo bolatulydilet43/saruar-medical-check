@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { fmtDate } from '../theme.js';
 import { analysisSummaryText } from '../utils/analysisDisplay.js';
+import Logo from '../components/Logo.jsx';
 
 const TODAY_LABEL = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -43,20 +44,25 @@ export default function Reports() {
 
       <div data-printarea="1" style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', padding: '40px 44px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 9, background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <polyline points="2,13 7,13 9,7 13,18 15,13 22,13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          <div style={{ width: 30, height: 30, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Logo size={30} />
           </div>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#111827' }}>Saruar Medical Check</div>
         </div>
-        <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 24 }}>Медицинское заключение · сформировано {TODAY_LABEL}</div>
+        <div style={{ fontSize: 11.5, color: '#6B7280', lineHeight: 1.6, marginBottom: 18 }}>
+          <div>Түркістан обл., Сарыағаш ауданы, Коктерек кенті, көш. Ы. Алтынсарин 33</div>
+          <div>Туркестанская обл., Сарыагашский район, п. Коктерек, ул. Ы.Алтынсарина 33</div>
+          <div>Тел.: +7 (725) 375-13-02 · Моб.: +7 (701) 038-15-15 (бронирование номеров)</div>
+          <div>instagram: saruar_saryagash · e-mail: sansaruar@gmail.com</div>
+        </div>
+        <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, borderTop: '1px solid #EDF0EF', paddingTop: 14 }}>Медицинское заключение · сформировано {TODAY_LABEL}</div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '10px 24px', fontSize: 13.5, color: '#374151', padding: '18px 20px', background: '#FAFBFB', borderRadius: 12, marginBottom: 26 }}>
           <div><span style={{ color: '#9CA3AF' }}>Пациент:</span> {patient.name}</div>
           <div><span style={{ color: '#9CA3AF' }}>Возраст/Пол:</span> {patient.age} лет, {patient.gender}</div>
           <div><span style={{ color: '#9CA3AF' }}>Заезд:</span> {fmtDate(patient.checkIn)}</div>
           <div><span style={{ color: '#9CA3AF' }}>Выезд:</span> {fmtDate(patient.checkOut)}</div>
+          {patient.phone && <div><span style={{ color: '#9CA3AF' }}>Телефон:</span> {patient.phone}</div>}
           <div style={{ gridColumn: '1 / -1' }}><span style={{ color: '#9CA3AF' }}>Аллергии:</span> {patient.allergies}</div>
         </div>
 

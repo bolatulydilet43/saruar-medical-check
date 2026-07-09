@@ -47,7 +47,7 @@ export default function DoctorReview() {
 
   return (
     <div style={{ maxWidth: 1180 }}>
-      <button onClick={() => navigate('/dashboard')} style={{ background: 'none', border: 'none', color: '#185FA5', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 12 }}>← Назад</button>
+      <button onClick={() => navigate(`/patients/${id}`)} style={{ background: 'none', border: 'none', color: '#185FA5', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', padding: 0, marginBottom: 12 }}>← К карте пациента</button>
       <div style={{ fontSize: 24, fontWeight: 800, color: '#111827', marginBottom: 20 }}>Приём: {patient.name}</div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22, alignItems: 'start' }}>
@@ -90,7 +90,17 @@ export default function DoctorReview() {
           >
             Подтвердить и подписать
           </button>
-          {confirmed && <span style={{ marginLeft: 14, fontSize: 13.5, color: '#1D7A57', fontWeight: 600 }}>Диагноз подписан ✓</span>}
+          {confirmed && (
+            <>
+              <span style={{ marginLeft: 14, fontSize: 13.5, color: '#1D7A57', fontWeight: 600 }}>Диагноз подписан ✓</span>
+              <button
+                onClick={() => navigate(`/patients/${id}`)}
+                style={{ marginLeft: 14, background: 'none', border: 'none', color: '#185FA5', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+              >
+                Открыть карту пациента →
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

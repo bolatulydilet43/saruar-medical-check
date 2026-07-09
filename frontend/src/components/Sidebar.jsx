@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import Logo from './Logo.jsx';
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Дашборд', icon: 'grid' },
-  { to: '/patients', label: 'Пациенты', icon: 'users' },
-  { to: '/appointments', label: 'Расписание', icon: 'calendar' },
-  { to: '/reports', label: 'Отчёты', icon: 'doc' },
-  { to: '/settings', label: 'Настройки', icon: 'sliders' },
+  { to: '/dashboard', label: 'Дашборд', icon: 'grid', matches: ['/dashboard'] },
+  // Doctor review (/review/:id) is launched from a patient's record, so it counts as "Пациенты" too.
+  { to: '/patients', label: 'Пациенты', icon: 'users', matches: ['/patients', '/review'] },
+  { to: '/analysis-entry', label: 'Внести анализ', icon: 'droplet', matches: ['/analysis-entry'] },
+  { to: '/appointments', label: 'Расписание', icon: 'calendar', matches: ['/appointments'] },
+  { to: '/reports', label: 'Отчёты', icon: 'doc', matches: ['/reports'] },
+  { to: '/settings', label: 'Настройки', icon: 'sliders', matches: ['/settings'] },
 ];
 
 const ICONS = {
@@ -23,6 +26,11 @@ const ICONS = {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.8" />
       <path d="M5 20c0-3.6 3.1-6.4 7-6.4s7 2.8 7 6.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+  droplet: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M12 3c3.5 4.2 6 7.6 6 10.5a6 6 0 1 1-12 0C6 10.6 8.5 7.2 12 3Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
     </svg>
   ),
   calendar: (
@@ -56,6 +64,7 @@ const ICONS = {
 export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
   const { user, logout } = useAuth();
+  const { pathname } = useLocation();
 
   const navStyle = (active) => ({
     display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '10px', border: 'none',
@@ -73,10 +82,8 @@ export default function Sidebar() {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '22px 18px' }}>
-        <div style={{ width: 34, height: 34, borderRadius: 10, background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <polyline points="2,13 7,13 9,7 13,18 15,13 22,13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div style={{ width: 34, height: 34, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Logo size={34} />
         </div>
         {expanded && (
           <div style={{ minWidth: 0, lineHeight: 1.15 }}>
@@ -87,12 +94,15 @@ export default function Sidebar() {
       </div>
 
       <div style={{ padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>
-        {NAV_ITEMS.map((item) => (
-          <NavLink key={item.to} to={item.to} style={({ isActive }) => navStyle(isActive)}>
-            <span style={{ flexShrink: 0 }}>{ICONS[item.icon]}</span>
-            {expanded && <span>{item.label}</span>}
-          </NavLink>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const active = item.matches.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/'));
+          return (
+            <Link key={item.to} to={item.to} style={navStyle(active)}>
+              <span style={{ flexShrink: 0 }}>{ICONS[item.icon]}</span>
+              {expanded && <span>{item.label}</span>}
+            </Link>
+          );
+        })}
       </div>
 
       <button

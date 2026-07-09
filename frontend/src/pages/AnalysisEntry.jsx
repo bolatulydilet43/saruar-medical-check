@@ -10,6 +10,9 @@ const TYPES = [
   { id: 'ecg', label: 'ЭКГ' },
   { id: 'bp', label: 'Давление' },
   { id: 'us', label: 'УЗИ' },
+  { id: 'sugar', label: 'Сахар' },
+  { id: 'biochem', label: 'Биохимия' },
+  { id: 'hormones', label: 'Гормоны' },
 ];
 
 const NUMERIC_FIELDS = {
@@ -18,9 +21,20 @@ const NUMERIC_FIELDS = {
   bp: ['systolic', 'diastolic', 'pulse'],
   ecg: ['heartRate'],
   us: [],
+  sugar: ['glucose'],
+  biochem: ['totalProtein', 'creatinine', 'alt', 'ast'],
+  hormones: ['tsh', 't3', 't4', 'prolactin'],
 };
 
+// Types that submit their numeric fields straight through as payload.values.
+const DIRECT_VALUE_TYPES = ['blood', 'bp', 'sugar', 'biochem', 'hormones'];
+
 const RHYTHMS = ['Синусовый ритм', 'Синусовая тахикардия', 'Синусовая брадикардия', 'Мерцательная аритмия', 'Другое'];
+
+// Example value shown as a placeholder — midpoint of the normal range, trimmed of trailing zeros.
+function exampleValue(min, max) {
+  return ((min + max) / 2).toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+}
 
 export default function AnalysisEntry() {
   const { user } = useAuth();
@@ -54,7 +68,7 @@ export default function AnalysisEntry() {
   async function submit() {
     if (!patientId) return;
     const payload = { analysisType: type, by: user?.name };
-    if (type === 'blood' || type === 'bp') payload.values = values;
+    if (DIRECT_VALUE_TYPES.includes(type)) payload.values = values;
     if (type === 'urine') payload.urine = { color: values.urineColorText, density: values.urineDensity, protein: values.urineProtein, glucose: values.urineGlucose, leukocytes: values.urineLeukocytes };
     if (type === 'ecg') { payload.rhythm = values.rhythm || 'Синусовый ритм'; payload.heartRate = values.heartRate; payload.conclusion = values.conclusion; }
     if (type === 'us') payload.conclusion = values.conclusion;
@@ -115,7 +129,11 @@ export default function AnalysisEntry() {
             {fieldsList.map((f) => (
               <div key={f.key}>
                 <label style={labelStyle}>{f.r.label} <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(норма {f.r.min}–{f.r.max} {f.r.unit})</span></label>
-                <input value={f.val} onChange={(e) => setValue(f.key, e.target.value)} style={{ ...inputStyle, border: `1.5px solid ${f.borderColor}` }} />
+                <input
+                  value={f.val} onChange={(e) => setValue(f.key, e.target.value)}
+                  placeholder={`Например, ${exampleValue(f.r.min, f.r.max)}`}
+                  style={{ ...inputStyle, border: `1.5px solid ${f.borderColor}` }}
+                />
               </div>
             ))}
           </div>

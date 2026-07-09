@@ -12,7 +12,7 @@ const FILTERS = [
   { id: 'red', label: 'Внимание' },
 ];
 
-const EMPTY_FORM = { name: '', age: '', gender: 'М', checkIn: '', checkOut: '', allergies: '' };
+const EMPTY_FORM = { name: '', age: '', gender: 'М', phone: '', checkIn: '', checkOut: '', allergies: '' };
 const GRID_COLUMNS = '2.2fr 1fr 1.4fr 1.2fr 1.2fr 1.6fr';
 
 export default function Patients() {
@@ -148,6 +148,11 @@ export default function Patients() {
                 <label style={labelStyle}>Выезд</label>
                 <input required type="date" value={form.checkOut} onChange={(e) => setField('checkOut', e.target.value)} style={inputStyle} />
               </div>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <label style={labelStyle}>Номер телефона</label>
+              <input type="tel" value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+7 700 123 45 67" style={inputStyle} />
             </div>
 
             <div style={{ marginBottom: 18 }}>

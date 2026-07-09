@@ -13,6 +13,15 @@ export const RANGES = {
   systolic: { label: 'Систолическое', unit: 'мм рт.ст.', min: 100, max: 130 },
   diastolic: { label: 'Диастолическое', unit: 'мм рт.ст.', min: 60, max: 85 },
   pulse: { label: 'Пульс', unit: 'уд/мин', min: 60, max: 90 },
+  glucose: { label: 'Сахар (глюкоза)', unit: 'ммоль/л', min: 3.9, max: 5.5 },
+  tsh: { label: 'ТТГ', unit: 'мЕд/л', min: 0.4, max: 4 },
+  t3: { label: 'Т3 свободный', unit: 'пмоль/л', min: 3.5, max: 6.5 },
+  t4: { label: 'Т4 свободный', unit: 'пмоль/л', min: 9, max: 22 },
+  prolactin: { label: 'Пролактин', unit: 'нг/мл', min: 4, max: 23.3 },
+  totalProtein: { label: 'Общий белок', unit: 'г/л', min: 64, max: 83 },
+  creatinine: { label: 'Креатинин', unit: 'мкмоль/л', min: 62, max: 115 },
+  alt: { label: 'АЛТ', unit: 'Ед/л', min: 7, max: 40 },
+  ast: { label: 'АСТ', unit: 'Ед/л', min: 8, max: 40 },
 };
 
 export function statusForValue(key, value) {

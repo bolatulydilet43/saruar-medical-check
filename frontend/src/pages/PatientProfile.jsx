@@ -18,6 +18,7 @@ export default function PatientProfile() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const canManage = user?.role === 'admin' || user?.role === 'doctor';
+  const canDiagnose = user?.role === 'doctor';
   const [patient, setPatient] = useState(null);
   const [ranges, setRanges] = useState(null);
   const [tab, setTab] = useState('history');
@@ -56,6 +57,7 @@ export default function PatientProfile() {
           <div>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#111827' }}>{patient.name}</div>
             <div style={{ fontSize: 14, color: '#6B7280', marginTop: 4 }}>{patient.age} лет, {patient.gender} · Заезд {fmtDate(patient.checkIn)} → Выезд {fmtDate(patient.checkOut)}</div>
+            {patient.phone && <div style={{ fontSize: 14, color: '#6B7280', marginTop: 2 }}>Тел.: {patient.phone}</div>}
           </div>
           <StatusBadge status={patient.status} />
         </div>
@@ -84,6 +86,14 @@ export default function PatientProfile() {
 
       {tab === 'diagnoses' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {canDiagnose && (
+            <button
+              onClick={() => navigate(`/review/${patient.id}`)}
+              style={{ alignSelf: 'flex-start', padding: '10px 16px', background: '#1D9E75', color: 'white', border: 'none', borderRadius: 10, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}
+            >
+              + Написать диагноз и назначения
+            </button>
+          )}
           {patient.diagnoses.map((d) => (
             <div key={d.id} style={{ background: 'white', borderRadius: 14, border: '1px solid #EDF0EF', padding: '18px 20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>

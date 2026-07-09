@@ -5,7 +5,6 @@ import { api } from '../api.js';
 import { fmtDate } from '../theme.js';
 import StatusBadge from '../components/StatusBadge.jsx';
 
-const FIRST_NAMES = { admin: 'Сергей', doctor: 'Елена', nurse: 'Анна' };
 const TODAY = new Date().toISOString().slice(0, 10);
 
 export default function Dashboard() {
@@ -32,7 +31,7 @@ export default function Dashboard() {
   return (
     <div style={{ maxWidth: 1120 }}>
       <div style={{ marginBottom: 26 }}>
-        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Добрый день, {FIRST_NAMES[user?.role] || ''}</div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Добрый день, {(user?.name || '').replace(/^Др\.\s*/, '')}</div>
       </div>
 
       {user?.role === 'admin' && (

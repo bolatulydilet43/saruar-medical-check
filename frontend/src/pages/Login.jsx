@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import Logo from '../components/Logo.jsx';
 
 const ROLES = [
   { id: 'admin', label: 'Администратор' },
@@ -63,10 +64,8 @@ export default function Login() {
         style={{ width: 430, maxWidth: '100%', background: '#FFFFFF', borderRadius: 20, boxShadow: '0 1px 3px rgba(16,24,32,0.06), 0 24px 48px rgba(16,24,32,0.07)', padding: '40px 36px' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 12, background: '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <polyline points="2,13 7,13 9,7 13,18 15,13 22,13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          <div style={{ width: 42, height: 42, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Logo size={42} />
           </div>
           <div>
             <div style={{ fontSize: 21, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Saruar Medical Check</div>
