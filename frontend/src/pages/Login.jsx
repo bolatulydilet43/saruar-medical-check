@@ -15,8 +15,9 @@ const PHONE_RE = /^\+?[0-9\s\-()]{7,}$/;
 
 export default function Login() {
   const [role, setRole] = useState('doctor');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+77');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -94,10 +95,20 @@ export default function Login() {
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 }}>Пароль (на английском)</label>
-            <input
-              type="password" placeholder="Doctor123" value={password} onChange={handlePasswordChange}
-              style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14.5, outline: 'none', color: '#111827' }}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'} placeholder="Doctor123" value={password} onChange={handlePasswordChange}
+                style={{ width: '100%', padding: '11px 40px 11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14.5, outline: 'none', color: '#111827', boxSizing: 'border-box' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', padding: 4, color: '#6B7280', fontSize: 13, fontWeight: 600 }}
+              >
+                {showPassword ? 'Скрыть' : 'Показать'}
+              </button>
+            </div>
           </div>
         </div>
 

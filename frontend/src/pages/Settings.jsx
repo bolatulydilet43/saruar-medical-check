@@ -3,7 +3,7 @@ import { api } from '../api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 
-const EMPTY_FORM = { name: '', role: 'doctor', specialty: '', phone: '', password: '' };
+const EMPTY_FORM = { name: '', role: 'doctor', specialty: '', phone: '+77', password: '' };
 const LATIN_PASSWORD_RE = /^[A-Za-z0-9!@#$%^&*()_\-+=.,:;'"~`<>?/\\|{}[\]]*$/;
 
 export default function Settings() {
@@ -21,6 +21,21 @@ export default function Settings() {
   useEffect(() => {
     reload();
   }, []);
+
+  async function toggleDuty(member) {
+    await api.setStaffDuty(member.id, !member.onDuty);
+    reload();
+  }
+
+  async function removeStaff(member) {
+    if (!window.confirm(`Удалить сотрудника «${member.name}»? Это действие необратимо.`)) return;
+    try {
+      await api.deleteStaff(member.id);
+      reload();
+    } catch (err) {
+      alert(err.message);
+    }
+  }
 
   function setField(key, val) {
     if (key === 'password' && !LATIN_PASSWORD_RE.test(val)) {
@@ -62,14 +77,32 @@ export default function Settings() {
       </div>
 
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.6fr 1fr', gap: 12, padding: '14px 20px', background: '#FAFBFB', fontSize: 12.5, fontWeight: 600, color: '#6B7280', borderBottom: '1px solid #EDF0EF' }}>
-          <div>Имя</div><div>Специализация</div><div>Статус</div>
+        <div style={{ display: 'grid', gridTemplateColumns: isAdmin ? '2fr 1.6fr 1fr 1.4fr' : '2fr 1.6fr 1fr', gap: 12, padding: '14px 20px', background: '#FAFBFB', fontSize: 12.5, fontWeight: 600, color: '#6B7280', borderBottom: '1px solid #EDF0EF' }}>
+          <div>Имя</div><div>Специализация</div><div>Статус</div>{isAdmin && <div>Действия</div>}
         </div>
         {staff.map((s) => (
-          <div key={s.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1.6fr 1fr', gap: 12, padding: '14px 20px', borderBottom: '1px solid #F3F5F4', alignItems: 'center', fontSize: 14 }}>
+          <div key={s.id} style={{ display: 'grid', gridTemplateColumns: isAdmin ? '2fr 1.6fr 1fr 1.4fr' : '2fr 1.6fr 1fr', gap: 12, padding: '14px 20px', borderBottom: '1px solid #F3F5F4', alignItems: 'center', fontSize: 14 }}>
             <div style={{ fontWeight: 600, color: '#111827' }}>{s.name}</div>
             <div style={{ color: '#6B7280' }}>{s.specialty}</div>
             <div><StatusBadge status={s.onDuty ? 'green' : 'neutral'} label={s.onDuty ? 'На смене' : 'Не на смене'} /></div>
+            {isAdmin && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => toggleDuty(s)}
+                  style={{ padding: '6px 10px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 12.5, cursor: 'pointer', color: '#374151' }}
+                >
+                  {s.onDuty ? 'Снять со смены' : 'На смену'}
+                </button>
+                {s.id !== user.id && (
+                  <button
+                    onClick={() => removeStaff(s)}
+                    style={{ padding: '6px 10px', background: '#FDECEC', border: '1px solid #F3C7C4', borderRadius: 8, fontSize: 12.5, cursor: 'pointer', color: '#C0392B' }}
+                  >
+                    Удалить
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>

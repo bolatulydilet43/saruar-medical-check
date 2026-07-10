@@ -12,7 +12,7 @@ const FILTERS = [
   { id: 'red', label: 'Внимание' },
 ];
 
-const EMPTY_FORM = { name: '', age: '', gender: 'М', phone: '', checkIn: '', checkOut: '', allergies: '' };
+const EMPTY_FORM = { name: '', age: '', gender: 'М', phone: '+77', checkIn: '', checkOut: '', allergies: '' };
 const GRID_COLUMNS = '2.2fr 1fr 1.4fr 1.2fr 1.2fr 1.6fr';
 
 export default function Patients() {

@@ -1,8 +1,9 @@
 import { LATIN_PASSWORD_RE, PHONE_RE } from '../utils/validators.js';
+import { hashPassword } from '../utils/passwords.js';
 
-// Never expose login credentials through the public staff listing.
+// Never expose the password hash through the public staff listing.
 export function serializeStaff(s) {
-  const { password, ...safe } = s;
+  const { passwordHash, ...safe } = s;
   return { ...safe, dutyLabel: s.onDuty ? 'На смене' : 'Не на смене' };
 }
 
@@ -27,6 +28,6 @@ export function createStaff({ name, role, specialty, phone, password }) {
     specialty: specialty.trim(),
     color: ROLE_COLORS[role],
     onDuty: true,
-    ...(phone ? { phone, password } : {}),
+    ...(phone ? { phone, passwordHash: hashPassword(password) } : {}),
   };
 }

@@ -6,3 +6,6 @@ dist/
 # Local Claude Code tool config/history — not part of the app
 .claude/
 .thumbnail
+
+# Local Netlify folder
+.netlify

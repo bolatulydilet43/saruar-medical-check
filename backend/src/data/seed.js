@@ -6,9 +6,11 @@ export const STAFF = [
   { id: 'n1', name: 'Анна Кузнецова', role: 'nurse', specialty: 'Процедурная медсестра', color: '#1D9E75', onDuty: true },
   { id: 'n2', name: 'Ольга Смирнова', role: 'nurse', specialty: 'Постовая медсестра', color: '#185FA5', onDuty: true },
   // Real credentials — this admin account requires an exact phone/password match to log in
-  // (see auth.routes.js). Other staff below have no `phone`/`password` and stay in demo mode.
+  // (see auth.routes.js). Other staff below have no `phone`/`passwordHash` and stay in demo
+  // mode (demo mode only works on the in-memory store — disabled once Supabase is configured).
+  // Hash is bcrypt('REDACTED-ROTATED', 10); the plaintext password is only ever typed at login.
   { id: 'a1', name: 'Әділет Болатұлы', role: 'admin', specialty: 'Администратор', color: '#6B7280', onDuty: true,
-    phone: '+77070060501', password: 'REDACTED-ROTATED' },
+    phone: '+77070060501', passwordHash: 'REDACTED-ROTATED-HASH' },
 ];
 
 export const PATIENTS = [

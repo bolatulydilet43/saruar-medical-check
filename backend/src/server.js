@@ -1,25 +1,13 @@
-import express from 'express';
-import cors from 'cors';
-import authRoutes from './routes/auth.routes.js';
-import staffRoutes from './routes/staff.routes.js';
-import patientsRoutes from './routes/patients.routes.js';
-import appointmentsRoutes from './routes/appointments.routes.js';
-import rangesRoutes from './routes/ranges.routes.js';
+import 'dotenv/config';
+import { createApp, apiRouter } from './app.js';
+import { isSupabaseConfigured } from './data/supabaseClient.js';
 
-const app = express();
+const app = createApp();
+app.use('/api', apiRouter);
+
 const PORT = process.env.PORT || 4000;
-
-app.use(cors());
-app.use(express.json());
-
-app.use('/api/auth', authRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/patients', patientsRoutes);
-app.use('/api/appointments', appointmentsRoutes);
-app.use('/api/ranges', rangesRoutes);
-
-app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 app.listen(PORT, () => {
   console.log(`Saruar Medical Check API listening on http://localhost:${PORT}`);
+  console.log(`Data store: ${isSupabaseConfigured ? 'Supabase (persistent)' : 'in-memory (resets on restart)'}`);
 });

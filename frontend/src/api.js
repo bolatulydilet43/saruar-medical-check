@@ -1,18 +1,24 @@
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-let currentRole = null;
-export function setAuthRole(role) {
-  currentRole = role;
+let authToken = null;
+export function setAuthToken(token) {
+  authToken = token;
+}
+
+let unauthorizedHandler = null;
+export function setUnauthorizedHandler(fn) {
+  unauthorizedHandler = fn;
 }
 
 async function request(path, options = {}) {
   const res = await fetch(BASE_URL + path, {
     headers: {
       'Content-Type': 'application/json',
-      ...(currentRole ? { 'x-user-role': currentRole } : {}),
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
     ...options,
   });
+  if (res.status === 401 && unauthorizedHandler) unauthorizedHandler();
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Request failed: ${res.status}`);
@@ -26,6 +32,8 @@ export const api = {
 
   getStaff: () => request('/staff'),
   createStaff: (payload) => request('/staff', { method: 'POST', body: JSON.stringify(payload) }),
+  setStaffDuty: (id, onDuty) => request(`/staff/${id}`, { method: 'PATCH', body: JSON.stringify({ onDuty }) }),
+  deleteStaff: (id) => request(`/staff/${id}`, { method: 'DELETE' }),
 
   getPatients: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
