@@ -35,6 +35,12 @@ export const memoryStore = {
     state.patients.unshift(patient);
     return patient;
   },
+  updatePatient: (id, patch) => {
+    const patient = state.patients.find((p) => p.id === id);
+    if (!patient) return null;
+    Object.assign(patient, patch);
+    return patient;
+  },
   deletePatient: (id) => {
     const idx = state.patients.findIndex((p) => p.id === id);
     if (idx === -1) return false;

@@ -48,6 +48,14 @@ export const supabaseStore = {
     check(error);
     return patient;
   },
+  async updatePatient(id, patch) {
+    const patient = await this.getPatient(id);
+    if (!patient) return null;
+    const updated = { ...patient, ...patch };
+    const { error } = await supabase.from('patients').update({ data: updated }).eq('id', id);
+    check(error);
+    return updated;
+  },
   async deletePatient(id) {
     const { data, error } = await supabase.from('patients').delete().eq('id', id).select('id');
     check(error);

@@ -1,5 +1,12 @@
+import { randomUUID, randomBytes } from 'node:crypto';
 import { statusMeta } from '../data/ranges.js';
-import { PHONE_RE } from '../utils/validators.js';
+import { PHONE_RE, assertMaxLength } from '../utils/validators.js';
+
+// High-entropy (192-bit) capability token for the patient self-service portal link/QR —
+// random enough that it needs no separate hashing the way a user-chosen password would.
+export function generatePortalToken() {
+  return randomBytes(24).toString('base64url');
+}
 
 // Adds display-ready fields (status label/colors) on top of a raw patient record.
 export function serializePatient(p) {
@@ -14,12 +21,20 @@ export function serializePatientSummary(p) {
   return { id, name, age, gender, phone, checkIn, checkOut, allergies, status, lastAnalysis, statusMeta: statusMeta(status) };
 }
 
+// Read-only view served through the public, unauthenticated patient-portal link — deliberately
+// narrow: no phone, no portalToken itself, no staff names beyond what's already on a diagnosis.
+export function serializePatientPortal(p) {
+  const { name, age, gender, checkIn, checkOut, allergies, analyses, diagnoses } = p;
+  return { name, age, gender, checkIn, checkOut, allergies, analyses, diagnoses };
+}
+
 export function createPatient({ name, age, gender, phone, checkIn, checkOut, allergies }) {
   if (!name || !name.trim()) throw new Error('Patient name is required');
   if (!checkIn || !checkOut) throw new Error('checkIn and checkOut are required');
   if (phone && !PHONE_RE.test(phone)) throw new Error('Введите корректный номер телефона');
+  assertMaxLength(allergies, 500, 'Аллергии');
   return {
-    id: 'p' + Date.now(),
+    id: 'p-' + randomUUID(),
     name: name.trim(),
     age: age ? parseInt(age, 10) : null,
     gender: gender || 'М',
@@ -29,6 +44,7 @@ export function createPatient({ name, age, gender, phone, checkIn, checkOut, all
     allergies: allergies && allergies.trim() ? allergies.trim() : 'Нет данных',
     status: 'green',
     lastAnalysis: null,
+    portalToken: generatePortalToken(),
     analyses: [],
     diagnoses: [],
     appointments: [],

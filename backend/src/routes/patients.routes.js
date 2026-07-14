@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { store } from '../data/store.js';
-import { serializePatientSummary, createPatient } from '../models/Patient.js';
+import { serializePatientSummary, createPatient, generatePortalToken } from '../models/Patient.js';
 import { createAnalysis } from '../models/Analysis.js';
 import { createDiagnosis } from '../models/Diagnosis.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
@@ -33,6 +33,14 @@ router.post('/', requireRole('admin', 'doctor'), async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
+});
+
+// Regenerates the patient's self-service portal link/QR token — also serves as a revoke,
+// since the old token stops working immediately once overwritten.
+router.post('/:id/portal-token', requireRole('admin', 'doctor'), async (req, res) => {
+  const patient = await store.updatePatient(req.params.id, { portalToken: generatePortalToken() });
+  if (!patient) return res.status(404).json({ error: 'Patient not found' });
+  res.json({ portalToken: patient.portalToken });
 });
 
 router.delete('/:id', requireRole('admin', 'doctor'), async (req, res) => {
