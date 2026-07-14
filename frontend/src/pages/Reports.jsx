@@ -3,6 +3,8 @@ import { api } from '../api.js';
 import { fmtDate } from '../theme.js';
 import { analysisSummaryText } from '../utils/analysisDisplay.js';
 import Logo from '../components/Logo.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
+import { brand } from '../brandConfig.js';
 
 const TODAY_LABEL = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -11,19 +13,28 @@ export default function Reports() {
   const [ranges, setRanges] = useState(null);
   const [patientId, setPatientId] = useState('');
   const [patient, setPatient] = useState(null);
+  const [error, setError] = useState('');
+
+  function loadList() {
+    setError('');
+    Promise.all([
+      api.getPatients().then((list) => {
+        setPatients(list);
+        if (list[0]) setPatientId(list[0].id);
+      }),
+      api.getRanges().then(setRanges),
+    ]).catch((err) => setError(err.message));
+  }
 
   useEffect(() => {
-    api.getPatients().then((list) => {
-      setPatients(list);
-      if (list[0]) setPatientId(list[0].id);
-    });
-    api.getRanges().then(setRanges);
+    loadList();
   }, []);
 
   useEffect(() => {
-    if (patientId) api.getPatient(patientId).then(setPatient);
+    if (patientId) api.getPatient(patientId).then(setPatient).catch((err) => setError(err.message));
   }, [patientId]);
 
+  if (error) return <ErrorBanner message={error} onRetry={loadList} />;
   if (!patient || !ranges) return <div style={{ color: '#9CA3AF' }}>Загрузка…</div>;
 
   const latestDiagnosis = patient.diagnoses[0];
@@ -47,13 +58,13 @@ export default function Reports() {
           <div style={{ width: 30, height: 30, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Logo size={30} />
           </div>
-          <div style={{ fontSize: 18, fontWeight: 800, color: '#111827' }}>Saruar Medical Check</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color: '#111827' }}>{brand.fullName}</div>
         </div>
         <div style={{ fontSize: 11.5, color: '#6B7280', lineHeight: 1.6, marginBottom: 18 }}>
-          <div>Түркістан обл., Сарыағаш ауданы, Коктерек кенті, көш. Ы. Алтынсарин 33</div>
-          <div>Туркестанская обл., Сарыагашский район, п. Коктерек, ул. Ы.Алтынсарина 33</div>
-          <div>Тел.: +7 (725) 375-13-02 · Моб.: +7 (701) 038-15-15 (бронирование номеров)</div>
-          <div>instagram: saruar_saryagash · e-mail: sansaruar@gmail.com</div>
+          <div>{brand.address}</div>
+          <div>{brand.addressRu}</div>
+          <div>{brand.phones}</div>
+          <div>{brand.contacts}</div>
         </div>
         <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, borderTop: '1px solid #EDF0EF', paddingTop: 14 }}>Медицинское заключение · сформировано {TODAY_LABEL}</div>
 

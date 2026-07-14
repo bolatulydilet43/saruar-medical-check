@@ -42,6 +42,8 @@ export const api = {
   getPatient: (id) => request(`/patients/${id}`),
   createPatient: (payload) => request('/patients', { method: 'POST', body: JSON.stringify(payload) }),
   deletePatient: (id) => request(`/patients/${id}`, { method: 'DELETE' }),
+  regeneratePortalToken: (id) => request(`/patients/${id}/portal-token`, { method: 'POST' }),
+  getPatientPortal: (token) => request(`/patient-portal/${token}`),
   addAnalysis: (patientId, payload) =>
     request(`/patients/${patientId}/analyses`, { method: 'POST', body: JSON.stringify(payload) }),
   addDiagnosis: (patientId, payload) =>

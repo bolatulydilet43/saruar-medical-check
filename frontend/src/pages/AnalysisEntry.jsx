@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../api.js';
 import { statusForValue } from '../theme.js';
+import ErrorBanner from '../components/ErrorBanner.jsx';
 
 const TYPES = [
   { id: 'blood', label: 'Общий анализ крови' },
@@ -45,13 +46,21 @@ export default function AnalysisEntry() {
   const [type, setType] = useState('blood');
   const [values, setValues] = useState({});
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+
+  function load() {
+    setError('');
+    Promise.all([
+      api.getPatients().then((list) => {
+        setPatients(list);
+        if (!patientId && list[0]) setPatientId(list[0].id);
+      }),
+      api.getRanges().then(setRanges),
+    ]).catch((err) => setError(err.message));
+  }
 
   useEffect(() => {
-    api.getPatients().then((list) => {
-      setPatients(list);
-      if (!patientId && list[0]) setPatientId(list[0].id);
-    });
-    api.getRanges().then(setRanges);
+    load();
   }, []);
 
   function setValue(key, val) {
@@ -67,15 +76,20 @@ export default function AnalysisEntry() {
 
   async function submit() {
     if (!patientId) return;
+    setError('');
     const payload = { analysisType: type, by: user?.name };
     if (DIRECT_VALUE_TYPES.includes(type)) payload.values = values;
     if (type === 'urine') payload.urine = { color: values.urineColorText, density: values.urineDensity, protein: values.urineProtein, glucose: values.urineGlucose, leukocytes: values.urineLeukocytes };
     if (type === 'ecg') { payload.rhythm = values.rhythm || 'Синусовый ритм'; payload.heartRate = values.heartRate; payload.conclusion = values.conclusion; }
     if (type === 'us') payload.conclusion = values.conclusion;
 
-    await api.addAnalysis(patientId, payload);
-    setValues({});
-    setSaved(true);
+    try {
+      await api.addAnalysis(patientId, payload);
+      setValues({});
+      setSaved(true);
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   const typeBtnStyle = (active) => ({
@@ -99,6 +113,8 @@ export default function AnalysisEntry() {
     <div style={{ maxWidth: 760 }}>
       <div style={{ fontSize: 26, fontWeight: 800, color: '#111827', marginBottom: 6 }}>Внести результаты анализа</div>
       <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 24 }}>Значения вне нормы подсвечиваются автоматически</div>
+
+      <ErrorBanner message={error} />
 
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', padding: '24px 26px' }}>
         <div style={{ marginBottom: 18 }}>
@@ -149,16 +165,10 @@ export default function AnalysisEntry() {
         )}
 
         {(type === 'ecg' || type === 'us') && (
-          <>
-            <div style={{ marginBottom: 14 }}>
-              <label style={labelStyle}>Заключение</label>
-              <textarea value={values.conclusion || ''} onChange={(e) => setValue('conclusion', e.target.value)} rows={3} placeholder="Введите текст заключения…" style={{ ...inputStyle, resize: 'vertical' }} />
-            </div>
-            <div style={{ marginBottom: 6 }}>
-              <label style={labelStyle}>Файл / изображение</label>
-              <input type="file" onChange={(e) => setValue('fileName', e.target.value)} style={{ width: '100%', fontSize: 13, color: '#6B7280' }} />
-            </div>
-          </>
+          <div style={{ marginBottom: 14 }}>
+            <label style={labelStyle}>Заключение</label>
+            <textarea value={values.conclusion || ''} onChange={(e) => setValue('conclusion', e.target.value)} rows={3} placeholder="Введите текст заключения…" style={{ ...inputStyle, resize: 'vertical' }} />
+          </div>
         )}
 
         <div style={{ height: 1, background: '#EEF1F0', margin: '18px 0' }} />

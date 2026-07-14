@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
 
 const EMPTY_FORM = { name: '', role: 'doctor', specialty: '', phone: '+77', password: '' };
 const LATIN_PASSWORD_RE = /^[A-Za-z0-9!@#$%^&*()_\-+=.,:;'"~`<>?/\\|{}[\]]*$/;
@@ -11,11 +13,14 @@ export default function Settings() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [pendingDelete, setPendingDelete] = useState(null);
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
 
   function reload() {
-    api.getStaff().then(setStaff);
+    setLoadError('');
+    api.getStaff().then(setStaff).catch((err) => setLoadError(err.message));
   }
 
   useEffect(() => {
@@ -23,12 +28,17 @@ export default function Settings() {
   }, []);
 
   async function toggleDuty(member) {
-    await api.setStaffDuty(member.id, !member.onDuty);
-    reload();
+    try {
+      await api.setStaffDuty(member.id, !member.onDuty);
+      reload();
+    } catch (err) {
+      alert(err.message);
+    }
   }
 
-  async function removeStaff(member) {
-    if (!window.confirm(`Удалить сотрудника «${member.name}»? Это действие необратимо.`)) return;
+  async function confirmRemoveStaff() {
+    const member = pendingDelete;
+    setPendingDelete(null);
     try {
       await api.deleteStaff(member.id);
       reload();
@@ -49,6 +59,10 @@ export default function Settings() {
   async function submitForm(e) {
     e.preventDefault();
     setError('');
+    if (form.password && form.password.length < 8) {
+      setError('Пароль должен быть не короче 8 символов');
+      return;
+    }
     try {
       await api.createStaff(form);
       setForm(EMPTY_FORM);
@@ -76,6 +90,8 @@ export default function Settings() {
         )}
       </div>
 
+      <ErrorBanner message={loadError} onRetry={reload} />
+
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', overflow: 'hidden' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isAdmin ? '2fr 1.6fr 1fr 1.4fr' : '2fr 1.6fr 1fr', gap: 12, padding: '14px 20px', background: '#FAFBFB', fontSize: 12.5, fontWeight: 600, color: '#6B7280', borderBottom: '1px solid #EDF0EF' }}>
           <div>Имя</div><div>Специализация</div><div>Статус</div>{isAdmin && <div>Действия</div>}
@@ -95,7 +111,7 @@ export default function Settings() {
                 </button>
                 {s.id !== user.id && (
                   <button
-                    onClick={() => removeStaff(s)}
+                    onClick={() => setPendingDelete(s)}
                     style={{ padding: '6px 10px', background: '#FDECEC', border: '1px solid #F3C7C4', borderRadius: 8, fontSize: 12.5, cursor: 'pointer', color: '#C0392B' }}
                   >
                     Удалить
@@ -140,7 +156,7 @@ export default function Settings() {
                 <input value={form.password} onChange={(e) => setField('password', e.target.value)} placeholder="Doctor123" style={inputStyle} />
               </div>
             </div>
-            <div style={{ fontSize: 11.5, color: '#9CA3AF', marginBottom: 16 }}>Если оставить пустыми, сотрудник сможет входить в демо-режиме (любой телефон/пароль).</div>
+            <div style={{ fontSize: 11.5, color: '#9CA3AF', marginBottom: 16 }}>Без телефона и пароля сотрудник не сможет войти в систему — оба поля нужно заполнить, чтобы выдать доступ.</div>
 
             {error && <div style={{ color: '#C0392B', fontSize: 13, marginBottom: 12 }}>{error}</div>}
 
@@ -151,6 +167,13 @@ export default function Settings() {
           </form>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        title={`Удалить сотрудника «${pendingDelete?.name}»? Это действие необратимо.`}
+        onConfirm={confirmRemoveStaff}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

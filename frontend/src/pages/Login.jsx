@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import Logo from '../components/Logo.jsx';
+import LanguageSwitcher from '../components/LanguageSwitcher.jsx';
+import { brand } from '../brandConfig.js';
 
-const ROLES = [
-  { id: 'admin', label: 'Администратор' },
-  { id: 'doctor', label: 'Врач' },
-  { id: 'nurse', label: 'Медсестра' },
-];
+const ROLES = ['admin', 'doctor', 'nurse'];
 
 // Password must be typed in English/Latin characters (no Cyrillic), same rule for every role.
 const LATIN_PASSWORD_RE = /^[A-Za-z0-9!@#$%^&*()_\-+=.,:;'"~`<>?/\\|{}[\]]*$/;
 const PHONE_RE = /^\+?[0-9\s\-()]{7,}$/;
 
 export default function Login() {
+  const { t } = useTranslation();
   const [role, setRole] = useState('doctor');
   const [phone, setPhone] = useState('+77');
   const [password, setPassword] = useState('');
@@ -25,7 +25,7 @@ export default function Login() {
   function handlePasswordChange(e) {
     const value = e.target.value;
     if (!LATIN_PASSWORD_RE.test(value)) {
-      setError('Пароль должен быть на английском языке (латиница, без кириллицы)');
+      setError(t('login.errorPassword'));
       return;
     }
     setError('');
@@ -35,11 +35,11 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!LATIN_PASSWORD_RE.test(password) || !password) {
-      setError('Пароль должен быть на английском языке (латиница, без кириллицы)');
+      setError(t('login.errorPassword'));
       return;
     }
     if (!PHONE_RE.test(phone)) {
-      setError('Введите корректный номер телефона');
+      setError(t('login.errorPhone'));
       return;
     }
     setError('');
@@ -64,37 +64,42 @@ export default function Login() {
         onSubmit={handleSubmit}
         style={{ width: 430, maxWidth: '100%', background: '#FFFFFF', borderRadius: 20, boxShadow: '0 1px 3px rgba(16,24,32,0.06), 0 24px 48px rgba(16,24,32,0.07)', padding: '40px 36px' }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <div style={{ width: 42, height: 42, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Logo size={42} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 42, height: 42, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Logo size={42} />
+            </div>
+            <div>
+              <div style={{ fontSize: 21, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>{brand.fullName}</div>
+              <div style={{ fontSize: 12.5, color: '#6B7280' }}>{brand.tagline}</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: 21, fontWeight: 800, color: '#111827', letterSpacing: '-0.02em' }}>Saruar Medical Check</div>
-            <div style={{ fontSize: 12.5, color: '#6B7280' }}>Санаторно-курортный медицинский центр</div>
+          <div style={{ width: 88, flexShrink: 0 }}>
+            <LanguageSwitcher />
           </div>
         </div>
 
         <div style={{ height: 1, background: '#EEF1F0', margin: '24px 0' }} />
 
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 10 }}>Выберите роль</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 10 }}>{t('login.chooseRole')}</div>
         <div style={{ display: 'flex', gap: 8, marginBottom: 22 }}>
           {ROLES.map((r) => (
-            <button key={r.id} type="button" onClick={() => setRole(r.id)} style={roleBtnStyle(r.id)}>
-              {r.label}
+            <button key={r} type="button" onClick={() => setRole(r)} style={roleBtnStyle(r)}>
+              {t(`role.${r}`)}
             </button>
           ))}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 }}>Номер телефона</label>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 }}>{t('login.phone')}</label>
             <input
               type="tel" placeholder="+7 700 123 45 67" value={phone} onChange={(e) => setPhone(e.target.value)}
               style={{ width: '100%', padding: '11px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14.5, outline: 'none', color: '#111827' }}
             />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 }}>Пароль (на английском)</label>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 }}>{t('login.password')}</label>
             <div style={{ position: 'relative' }}>
               <input
                 type={showPassword ? 'text' : 'password'} placeholder="Doctor123" value={password} onChange={handlePasswordChange}
@@ -103,10 +108,10 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+                aria-label={showPassword ? t('login.hide') : t('login.show')}
                 style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', cursor: 'pointer', padding: 4, color: '#6B7280', fontSize: 13, fontWeight: 600 }}
               >
-                {showPassword ? 'Скрыть' : 'Показать'}
+                {showPassword ? t('login.hide') : t('login.show')}
               </button>
             </div>
           </div>
@@ -118,10 +123,10 @@ export default function Login() {
           type="submit"
           style={{ width: '100%', marginTop: 22, padding: 13, background: '#1D9E75', color: 'white', border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
         >
-          Войти как «{ROLES.find((r) => r.id === role).label}»
+          {t('login.submit', { role: t(`role.${role}`) })}
         </button>
 
-        <div style={{ textAlign: 'center', fontSize: 12, color: '#9CA3AF', marginTop: 18 }}>Демо-режим — введите любые данные для входа</div>
+        <div style={{ textAlign: 'center', fontSize: 12, color: '#9CA3AF', marginTop: 18 }}>{t('login.footer')}</div>
       </form>
     </div>
   );

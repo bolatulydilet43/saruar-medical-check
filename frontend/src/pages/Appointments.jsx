@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api.js';
 import { fmtDateShort } from '../theme.js';
+import ErrorBanner from '../components/ErrorBanner.jsx';
 
 const WEEKDAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
@@ -23,11 +24,20 @@ export default function Appointments() {
   const [bookingDoctor, setBookingDoctor] = useState('');
   const [bookingTime, setBookingTime] = useState('');
   const [patients, setPatients] = useState([]);
+  const [error, setError] = useState('');
+  const [bookingError, setBookingError] = useState('');
+
+  function load() {
+    setError('');
+    Promise.all([
+      api.getStaff().then(setStaff),
+      api.getPatients().then(setPatients),
+      api.getAppointments().then(setAppts),
+    ]).catch((err) => setError(err.message));
+  }
 
   useEffect(() => {
-    api.getStaff().then(setStaff);
-    api.getPatients().then(setPatients);
-    api.getAppointments().then(setAppts);
+    load();
   }, []);
 
   const today = toIso(new Date());
@@ -50,9 +60,14 @@ export default function Appointments() {
 
   async function saveBooking() {
     if (!bookingDay || !bookingPatient || !bookingDoctor || !bookingTime) return;
-    const appt = await api.addAppointment({ date: bookingDay, time: bookingTime, patient: bookingPatient, doctorId: bookingDoctor });
-    setAppts((a) => [...a, appt]);
-    setBookingDay(null);
+    setBookingError('');
+    try {
+      const appt = await api.addAppointment({ date: bookingDay, time: bookingTime, patient: bookingPatient, doctorId: bookingDoctor });
+      setAppts((a) => [...a, appt]);
+      setBookingDay(null);
+    } catch (err) {
+      setBookingError(err.message);
+    }
   }
 
   return (
@@ -60,11 +75,13 @@ export default function Appointments() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Расписание приёмов</div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button onClick={() => setWeekOffset((w) => w - 1)} style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>‹</button>
+          <button onClick={() => setWeekOffset((w) => w - 1)} aria-label="Предыдущая неделя" style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>‹</button>
           <div style={{ fontSize: 13.5, color: '#374151', minWidth: 150, textAlign: 'center' }}>{fmtDateShort(weekDays[0]?.iso)} – {fmtDateShort(weekDays[6]?.iso)}</div>
-          <button onClick={() => setWeekOffset((w) => w + 1)} style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>›</button>
+          <button onClick={() => setWeekOffset((w) => w + 1)} aria-label="Следующая неделя" style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>›</button>
         </div>
       </div>
+
+      <ErrorBanner message={error} onRetry={load} />
 
       <div style={{ display: 'flex', gap: 14, margin: '14px 0 20px', flexWrap: 'wrap' }}>
         {doctorLegend.map((dl) => (
@@ -91,7 +108,7 @@ export default function Appointments() {
                   </div>
                 ))}
                 <button
-                  onClick={() => { setBookingDay(day.iso); setBookingPatient(''); setBookingDoctor(''); setBookingTime(''); }}
+                  onClick={() => { setBookingDay(day.iso); setBookingPatient(''); setBookingDoctor(''); setBookingTime(''); setBookingError(''); }}
                   style={{ marginTop: 'auto', padding: 6, background: '#FAFBFB', border: '1px dashed #D8DEDC', borderRadius: 8, fontSize: 11.5, color: '#6B7280', cursor: 'pointer' }}
                 >
                   + Запись
@@ -106,6 +123,8 @@ export default function Appointments() {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
           <div style={{ background: 'white', borderRadius: 16, padding: '26px 28px', width: 360, boxShadow: '0 24px 48px rgba(0,0,0,0.18)' }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>Новая запись — {fmtDateShort(bookingDay)}</div>
+
+            <ErrorBanner message={bookingError} />
 
             <label style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 }}>Пациент</label>
             <select value={bookingPatient} onChange={(e) => setBookingPatient(e.target.value)} style={{ width: '100%', padding: '9px 10px', border: '1.5px solid #E5E7EB', borderRadius: 8, fontSize: 13.5, marginBottom: 12 }}>

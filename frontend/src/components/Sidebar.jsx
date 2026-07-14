@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import Logo from './Logo.jsx';
+import { brand } from '../brandConfig.js';
+import LanguageSwitcher from './LanguageSwitcher.jsx';
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Дашборд', icon: 'grid', matches: ['/dashboard'] },
+  { to: '/dashboard', labelKey: 'nav.dashboard', icon: 'grid', matches: ['/dashboard'] },
   // Doctor review (/review/:id) is launched from a patient's record, so it counts as "Пациенты" too.
-  { to: '/patients', label: 'Пациенты', icon: 'users', matches: ['/patients', '/review'] },
-  { to: '/analysis-entry', label: 'Внести анализ', icon: 'droplet', matches: ['/analysis-entry'] },
-  { to: '/appointments', label: 'Расписание', icon: 'calendar', matches: ['/appointments'] },
-  { to: '/reports', label: 'Отчёты', icon: 'doc', matches: ['/reports'] },
-  { to: '/settings', label: 'Настройки', icon: 'sliders', matches: ['/settings'] },
+  { to: '/patients', labelKey: 'nav.patients', icon: 'users', matches: ['/patients', '/review'] },
+  { to: '/analysis-entry', labelKey: 'nav.analysisEntry', icon: 'droplet', matches: ['/analysis-entry'] },
+  { to: '/appointments', labelKey: 'nav.appointments', icon: 'calendar', matches: ['/appointments'] },
+  { to: '/reports', labelKey: 'nav.reports', icon: 'doc', matches: ['/reports'] },
+  { to: '/settings', labelKey: 'nav.settings', icon: 'sliders', matches: ['/settings'] },
 ];
 
 const ICONS = {
@@ -65,6 +68,8 @@ export default function Sidebar() {
   const [expanded, setExpanded] = useState(true);
   const { user, logout } = useAuth();
   const { pathname } = useLocation();
+  const { t } = useTranslation();
+  const roleLabel = user?.role ? t(`role.${user.role}`) : '';
 
   const navStyle = (active) => ({
     display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '10px', border: 'none',
@@ -87,8 +92,8 @@ export default function Sidebar() {
         </div>
         {expanded && (
           <div style={{ minWidth: 0, lineHeight: 1.15 }}>
-            <div style={{ fontSize: 15, fontWeight: 800, color: '#111827', whiteSpace: 'nowrap' }}>Saruar</div>
-            <div style={{ fontSize: 11.5, fontWeight: 600, color: '#6B7280', whiteSpace: 'nowrap' }}>Medical Check</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#111827', whiteSpace: 'nowrap' }}>{brand.shortName}</div>
+            <div style={{ fontSize: 11.5, fontWeight: 600, color: '#6B7280', whiteSpace: 'nowrap' }}>{brand.fullName.replace(brand.shortName, '').trim()}</div>
           </div>
         )}
       </div>
@@ -99,7 +104,7 @@ export default function Sidebar() {
           return (
             <Link key={item.to} to={item.to} style={navStyle(active)}>
               <span style={{ flexShrink: 0 }}>{ICONS[item.icon]}</span>
-              {expanded && <span>{item.label}</span>}
+              {expanded && <span>{t(item.labelKey)}</span>}
             </Link>
           );
         })}
@@ -107,23 +112,31 @@ export default function Sidebar() {
 
       <button
         onClick={() => setExpanded((e) => !e)}
+        aria-label={expanded ? t('sidebar.collapse') : t('sidebar.expand')}
+        aria-expanded={expanded}
         style={{
           margin: '8px 12px', padding: '8px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8,
           fontSize: 12, color: '#6B7280', cursor: 'pointer',
         }}
       >
-        {expanded ? '‹ Свернуть' : '›'}
+        {expanded ? `‹ ${t('sidebar.collapse')}` : '›'}
       </button>
+
+      {expanded && (
+        <div style={{ padding: '0 12px', marginBottom: 4 }}>
+          <LanguageSwitcher />
+        </div>
+      )}
 
       <div style={{ marginTop: 'auto', padding: '16px 18px', borderTop: '1px solid #EDF0EF' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#E6F5EE', color: '#1D7A57', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
-            {(user?.roleLabel || '?').slice(0, 1)}
+            {(roleLabel || '?').slice(0, 1)}
           </div>
           {expanded && (
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 13.5, fontWeight: 600, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
-              <div style={{ fontSize: 12, color: '#6B7280' }}>{user?.roleLabel}</div>
+              <div style={{ fontSize: 12, color: '#6B7280' }}>{roleLabel}</div>
             </div>
           )}
         </div>

@@ -1,3 +1,5 @@
+import i18n from './i18n.js';
+
 export const COLORS = {
   primary: '#1D9E75',
   primaryDark: '#1D7A57',
@@ -8,11 +10,13 @@ export const COLORS = {
   bg: '#F5F8F7',
 };
 
+// statusMeta is called from plain JS (models, not just components), so it reads the
+// i18next instance directly rather than the useTranslation() hook.
 export function statusMeta(status) {
-  if (status === 'red') return { label: 'Требует внимания', bg: '#FDECEC', fg: '#C0392B', dot: '#E0524A' };
-  if (status === 'amber') return { label: 'Небольшое отклонение', bg: '#FDF3E0', fg: '#966F14', dot: '#E0A72E' };
-  if (status === 'neutral') return { label: 'Не на смене', bg: '#F3F4F6', fg: '#6B7280', dot: '#9CA3AF' };
-  return { label: 'Норма', bg: '#E6F5EE', fg: '#1D7A57', dot: '#1D9E75' };
+  if (status === 'red') return { label: i18n.t('status.red'), bg: '#FDECEC', fg: '#C0392B', dot: '#E0524A' };
+  if (status === 'amber') return { label: i18n.t('status.amber'), bg: '#FDF3E0', fg: '#966F14', dot: '#E0A72E' };
+  if (status === 'neutral') return { label: i18n.t('status.neutral'), bg: '#F3F4F6', fg: '#6B7280', dot: '#9CA3AF' };
+  return { label: i18n.t('status.green'), bg: '#E6F5EE', fg: '#1D7A57', dot: '#1D9E75' };
 }
 
 export function statusForValue(range, value) {

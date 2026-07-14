@@ -5,7 +5,11 @@ import { fmtDate } from '../theme.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import AnalysisCard from '../components/AnalysisCard.jsx';
-import { buildAnalysisDisplay } from '../utils/analysisDisplay.js';
+import ErrorBanner from '../components/ErrorBanner.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
+import TrendChart from '../components/TrendChart.jsx';
+import PatientPortalLink from '../components/PatientPortalLink.jsx';
+import { buildAnalysisDisplay, buildTrendSeries } from '../utils/analysisDisplay.js';
 
 const TABS = [
   { id: 'history', label: 'Анализы' },
@@ -22,18 +26,32 @@ export default function PatientProfile() {
   const [patient, setPatient] = useState(null);
   const [ranges, setRanges] = useState(null);
   const [tab, setTab] = useState('history');
+  const [error, setError] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+
+  function load() {
+    setError('');
+    Promise.all([api.getPatient(id).then(setPatient), api.getRanges().then(setRanges)])
+      .catch((err) => setError(err.message));
+  }
 
   useEffect(() => {
-    api.getPatient(id).then(setPatient);
-    api.getRanges().then(setRanges);
+    load();
   }, [id]);
 
+  if (error) return <ErrorBanner message={error} onRetry={load} />;
   if (!patient || !ranges) return <div style={{ color: '#9CA3AF' }}>Загрузка…</div>;
 
+  const trendSeries = buildTrendSeries(patient.analyses, ranges);
+
   async function handleDelete() {
-    if (!window.confirm(`Удалить пациента «${patient.name}»? Это действие необратимо.`)) return;
-    await api.deletePatient(patient.id);
-    navigate('/patients');
+    setConfirmingDelete(false);
+    try {
+      await api.deletePatient(patient.id);
+      navigate('/patients');
+    } catch (err) {
+      alert(err.message);
+    }
   }
 
   const hasAllergies = patient.allergies && patient.allergies !== 'Нет' && patient.allergies !== 'Нет данных';
@@ -48,7 +66,7 @@ export default function PatientProfile() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <button onClick={() => navigate('/patients')} style={{ background: 'none', border: 'none', color: '#185FA5', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}>← К списку пациентов</button>
         {canManage && (
-          <button onClick={handleDelete} style={{ padding: '7px 14px', background: '#FDECEC', color: '#C0392B', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Удалить пациента</button>
+          <button onClick={() => setConfirmingDelete(true)} style={{ padding: '7px 14px', background: '#FDECEC', color: '#C0392B', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Удалить пациента</button>
         )}
       </div>
 
@@ -69,6 +87,16 @@ export default function PatientProfile() {
         </div>
       </div>
 
+      {canManage && (
+        <div style={{ marginBottom: 22 }}>
+          <PatientPortalLink
+            patientId={patient.id}
+            portalToken={patient.portalToken}
+            onTokenChange={(token) => setPatient((p) => ({ ...p, portalToken: token }))}
+          />
+        </div>
+      )}
+
       <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid #EDF0EF', marginBottom: 20 }}>
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} style={tabStyle(tab === t.id)}>{t.label}</button>
@@ -77,6 +105,11 @@ export default function PatientProfile() {
 
       {tab === 'history' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {trendSeries.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 14, marginBottom: 4 }}>
+              {trendSeries.map((s) => <TrendChart key={s.key} series={s} />)}
+            </div>
+          )}
           {patient.analyses.map((a) => (
             <AnalysisCard key={a.id} a={buildAnalysisDisplay(a, ranges)} />
           ))}
@@ -131,6 +164,13 @@ export default function PatientProfile() {
           {patient.appointments.length === 0 && <EmptyState text="Записей на приём нет" />}
         </div>
       )}
+
+      <ConfirmModal
+        open={confirmingDelete}
+        title={`Удалить пациента «${patient.name}»? Это действие необратимо.`}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
     </div>
   );
 }

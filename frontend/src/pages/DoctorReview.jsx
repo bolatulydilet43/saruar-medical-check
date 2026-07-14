@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../api.js';
 import AnalysisCard from '../components/AnalysisCard.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
 import { buildAnalysisDisplay } from '../utils/analysisDisplay.js';
 
 const EMPTY_ROW = { medication: '', dosage: '', frequency: '', duration: '' };
@@ -16,10 +17,17 @@ export default function DoctorReview() {
   const [diagnosisText, setDiagnosisText] = useState('');
   const [rows, setRows] = useState([{ ...EMPTY_ROW }]);
   const [confirmed, setConfirmed] = useState(false);
+  const [error, setError] = useState('');
+  const [submitError, setSubmitError] = useState('');
+
+  function load() {
+    setError('');
+    Promise.all([api.getPatient(id).then(setPatient), api.getRanges().then(setRanges)])
+      .catch((err) => setError(err.message));
+  }
 
   useEffect(() => {
-    api.getPatient(id).then(setPatient);
-    api.getRanges().then(setRanges);
+    load();
   }, [id]);
 
   function setRowField(idx, key, val) {
@@ -36,10 +44,16 @@ export default function DoctorReview() {
 
   async function confirmDiagnosis() {
     if (!canConfirm) return;
-    await api.addDiagnosis(id, { doctor: user?.name, text: diagnosisText, prescriptions: rows });
-    setConfirmed(true);
+    setSubmitError('');
+    try {
+      await api.addDiagnosis(id, { doctor: user?.name, text: diagnosisText, prescriptions: rows });
+      setConfirmed(true);
+    } catch (err) {
+      setSubmitError(err.message);
+    }
   }
 
+  if (error) return <ErrorBanner message={error} onRetry={load} />;
   if (!patient || !ranges) return <div style={{ color: '#9CA3AF' }}>Загрузка…</div>;
 
   const analyses = patient.analyses.map((a) => buildAnalysisDisplay(a, ranges));
@@ -77,12 +91,14 @@ export default function DoctorReview() {
                 <input value={rx.dosage} onChange={(e) => setRowField(i, 'dosage', e.target.value)} placeholder="Дозировка" style={inputStyle} />
                 <input value={rx.frequency} onChange={(e) => setRowField(i, 'frequency', e.target.value)} placeholder="Частота" style={inputStyle} />
                 <input value={rx.duration} onChange={(e) => setRowField(i, 'duration', e.target.value)} placeholder="Длительность" style={inputStyle} />
-                <button onClick={() => removeRow(i)} style={{ width: 28, height: 28, border: 'none', background: '#FDECEC', color: '#C0392B', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>×</button>
+                <button onClick={() => removeRow(i)} aria-label="Удалить препарат" style={{ width: 28, height: 28, border: 'none', background: '#FDECEC', color: '#C0392B', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>×</button>
               </div>
             ))}
           </div>
 
           <div style={{ background: '#FAFBFB', borderRadius: 10, padding: '12px 14px', fontSize: 12.5, color: '#6B7280', marginBottom: 16 }}>Финальный диагноз требует подтверждения врача.</div>
+
+          <ErrorBanner message={submitError} />
 
           <button
             onClick={confirmDiagnosis}

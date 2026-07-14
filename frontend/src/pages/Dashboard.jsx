@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../api.js';
 import { fmtDate } from '../theme.js';
 import StatusBadge from '../components/StatusBadge.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -13,12 +14,20 @@ export default function Dashboard() {
   const [patients, setPatients] = useState([]);
   const [staff, setStaff] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [error, setError] = useState('');
+
+  const load = useCallback(() => {
+    setError('');
+    Promise.all([
+      api.getPatients().then(setPatients),
+      api.getStaff().then(setStaff),
+      api.getAppointments({ date: TODAY }).then(setAppointments),
+    ]).catch((err) => setError(err.message));
+  }, []);
 
   useEffect(() => {
-    api.getPatients().then(setPatients);
-    api.getStaff().then(setStaff);
-    api.getAppointments({ date: TODAY }).then(setAppointments);
-  }, []);
+    load();
+  }, [load]);
 
   const attentionCount = patients.filter((p) => p.status === 'red').length;
   const staffOnDuty = staff.filter((s) => s.onDuty);
@@ -33,6 +42,8 @@ export default function Dashboard() {
       <div style={{ marginBottom: 26 }}>
         <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Добрый день, {(user?.name || '').replace(/^Др\.\s*/, '')}</div>
       </div>
+
+      <ErrorBanner message={error} onRetry={load} />
 
       {user?.role === 'admin' && (
         <>

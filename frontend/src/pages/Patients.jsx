@@ -4,6 +4,9 @@ import { api } from '../api.js';
 import { fmtDate } from '../theme.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
+import ErrorBanner from '../components/ErrorBanner.jsx';
+import ConfirmModal from '../components/ConfirmModal.jsx';
+import { exportPatientsExcel } from '../utils/exportPatientsExcel.js';
 
 const FILTERS = [
   { id: 'all', label: 'Все' },
@@ -22,12 +25,17 @@ export default function Patients() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
   const navigate = useNavigate();
   const { user } = useAuth();
   const canManage = user?.role === 'admin' || user?.role === 'doctor';
 
   function reload() {
-    api.getPatients({ q: query, status: filter }).then(setPatients);
+    setLoadError('');
+    api.getPatients({ q: query, status: filter }).then(setPatients).catch((err) => setLoadError(err.message));
   }
 
   useEffect(() => {
@@ -58,10 +66,28 @@ export default function Patients() {
     }
   }
 
-  async function handleDelete(p) {
-    if (!window.confirm(`Удалить пациента «${p.name}»? Это действие необратимо.`)) return;
-    await api.deletePatient(p.id);
-    reload();
+  async function handleExport() {
+    setExporting(true);
+    setExportError('');
+    try {
+      const all = await api.getPatients({});
+      await exportPatientsExcel(all);
+    } catch (err) {
+      setExportError(err.message);
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function confirmDelete() {
+    const p = pendingDelete;
+    setPendingDelete(null);
+    try {
+      await api.deletePatient(p.id);
+      reload();
+    } catch (err) {
+      alert(err.message);
+    }
   }
 
   const inputStyle = { width: '100%', padding: '10px 12px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, outline: 'none' };
@@ -71,15 +97,25 @@ export default function Patients() {
     <div style={{ maxWidth: 1200 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Пациенты</div>
-        {canManage && (
+        <div style={{ display: 'flex', gap: 10 }}>
           <button
-            onClick={() => { setForm(EMPTY_FORM); setError(''); setShowForm(true); }}
-            style={{ padding: '10px 16px', background: '#1D9E75', color: 'white', border: 'none', borderRadius: 10, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}
+            onClick={handleExport}
+            disabled={exporting}
+            style={{ padding: '10px 16px', background: 'white', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 13.5, fontWeight: 600, cursor: exporting ? 'default' : 'pointer', opacity: exporting ? 0.6 : 1 }}
           >
-            + Добавить пациента
+            {exporting ? 'Экспорт…' : 'Экспорт в Excel'}
           </button>
-        )}
+          {canManage && (
+            <button
+              onClick={() => { setForm(EMPTY_FORM); setError(''); setShowForm(true); }}
+              style={{ padding: '10px 16px', background: '#1D9E75', color: 'white', border: 'none', borderRadius: 10, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}
+            >
+              + Добавить пациента
+            </button>
+          )}
+        </div>
       </div>
+      <ErrorBanner message={exportError} />
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
         <input
@@ -92,6 +128,8 @@ export default function Patients() {
           ))}
         </div>
       </div>
+
+      <ErrorBanner message={loadError} onRetry={reload} />
 
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', overflow: 'hidden' }}>
         <div style={{ display: 'grid', gridTemplateColumns: GRID_COLUMNS, gap: 12, padding: '14px 20px', background: '#FAFBFB', fontSize: 12.5, fontWeight: 600, color: '#6B7280', borderBottom: '1px solid #EDF0EF' }}>
@@ -107,7 +145,7 @@ export default function Patients() {
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => navigate(`/patients/${p.id}`)} style={{ padding: '7px 14px', background: '#F0F7F4', color: '#1D7A57', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Профиль</button>
               {canManage && (
-                <button onClick={() => handleDelete(p)} style={{ padding: '7px 14px', background: '#FDECEC', color: '#C0392B', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Удалить</button>
+                <button onClick={() => setPendingDelete(p)} style={{ padding: '7px 14px', background: '#FDECEC', color: '#C0392B', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Удалить</button>
               )}
             </div>
           </div>
@@ -169,6 +207,13 @@ export default function Patients() {
           </form>
         </div>
       )}
+
+      <ConfirmModal
+        open={!!pendingDelete}
+        title={`Удалить пациента «${pendingDelete?.name}»? Это действие необратимо.`}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

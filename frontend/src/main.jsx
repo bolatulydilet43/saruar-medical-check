@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { brand } from './brandConfig.js';
+import './i18n.js';
+
+document.title = brand.fullName;
 
 const style = document.createElement('style');
 style.textContent = `

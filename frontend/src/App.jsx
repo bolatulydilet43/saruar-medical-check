@@ -10,11 +10,13 @@ import DoctorReview from './pages/DoctorReview.jsx';
 import Appointments from './pages/Appointments.jsx';
 import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
+import PatientPortalView from './pages/PatientPortalView.jsx';
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/patient-view/:token" element={<PatientPortalView />} />
 
       <Route
         element={

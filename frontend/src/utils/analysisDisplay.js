@@ -48,6 +48,39 @@ export function buildAnalysisDisplay(a, ranges) {
   return { ...a, rows, extraText, conclusion };
 }
 
+// Pivots a patient's analysis history into one time series per numeric metric (grouped by
+// the same range key used for status/label lookup, so blood leukocytes and urine leukocytes
+// — different scales entirely — never merge). Only metrics with 2+ data points are returned,
+// sorted oldest first, since a single point has no trend to show.
+export function buildTrendSeries(analyses, ranges) {
+  const byKey = {};
+
+  function addPoint(rangeKey, date, rawValue) {
+    if (rawValue === undefined || rawValue === null || rawValue === '') return;
+    const value = parseFloat(rawValue);
+    if (isNaN(value)) return;
+    const r = ranges[rangeKey];
+    const status = statusForValue(r, rawValue);
+    if (!byKey[rangeKey]) byKey[rangeKey] = { key: rangeKey, label: r ? r.label : rangeKey, unit: r ? r.unit : '', range: r, points: [] };
+    byKey[rangeKey].points.push({ date, value, status });
+  }
+
+  analyses.forEach((a) => {
+    const specs = VALUE_FIELD_SPECS[a.type];
+    if (specs && a.values) {
+      specs.forEach(([valueKey, rangeKey]) => addPoint(rangeKey, a.date, a.values[valueKey]));
+    } else if (a.type === 'Общий анализ мочи' && a.urine) {
+      URINE_FIELD_SPECS.forEach(([valueKey, rangeKey]) => addPoint(rangeKey, a.date, a.urine[valueKey]));
+    } else if (a.type === 'ЭКГ') {
+      addPoint('heartRate', a.date, a.heartRate);
+    }
+  });
+
+  return Object.values(byKey)
+    .filter((s) => s.points.length >= 2)
+    .map((s) => ({ ...s, points: s.points.slice().sort((x, y) => x.date.localeCompare(y.date)) }));
+}
+
 export function analysisSummaryText(a, ranges) {
   if (VALUE_FIELD_SPECS[a.type]) {
     return buildRows(VALUE_FIELD_SPECS[a.type], a.values, ranges).map((r) => `${r.label}: ${r.value} ${r.unit}`).join(', ');
