@@ -1,8 +1,10 @@
+import { randomUUID } from 'node:crypto';
+
 export function createAppointment({ date, time, patient, doctorId, staff }) {
   if (!date || !time || !patient || !doctorId) throw new Error('date, time, patient and doctorId are required');
   const doc = staff.find((s) => s.id === doctorId);
   return {
-    id: 'w' + Date.now(),
+    id: 'w-' + randomUUID(),
     date,
     time,
     patient,

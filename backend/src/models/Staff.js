@@ -1,4 +1,5 @@
-import { LATIN_PASSWORD_RE, PHONE_RE } from '../utils/validators.js';
+import { randomUUID } from 'node:crypto';
+import { NEW_PASSWORD_RE, PHONE_RE } from '../utils/validators.js';
 import { hashPassword } from '../utils/passwords.js';
 
 // Never expose the password hash through the public staff listing.
@@ -14,15 +15,15 @@ export function createStaff({ name, role, specialty, phone, password }) {
   if (role !== 'doctor' && role !== 'nurse') throw new Error('Роль должна быть "doctor" или "nurse"');
   if (!specialty || !specialty.trim()) throw new Error('Специализация обязательна');
   if (phone && !PHONE_RE.test(phone)) throw new Error('Введите корректный номер телефона');
-  if (password && !LATIN_PASSWORD_RE.test(password)) {
-    throw new Error('Пароль должен быть на английском языке (латиница, без кириллицы)');
+  if (password && !NEW_PASSWORD_RE.test(password)) {
+    throw new Error('Пароль должен быть на английском языке (латиница, без кириллицы), не короче 8 символов');
   }
   if ((phone && !password) || (password && !phone)) {
     throw new Error('Укажите и телефон, и пароль, либо оставьте оба поля пустыми');
   }
 
   return {
-    id: (role === 'doctor' ? 'd' : 'n') + Date.now(),
+    id: (role === 'doctor' ? 'd-' : 'n-') + randomUUID(),
     name: name.trim(),
     role,
     specialty: specialty.trim(),

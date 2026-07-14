@@ -1,16 +1,27 @@
 // Seed data for the in-memory store. Mirrors the original design mockup's dataset.
+// There is no demo-mode login fallback anymore (see auth.routes.js) — every staff member
+// needs a phone + passwordHash to log in, even for local dev. The demo accounts below all
+// share the same dev-only password 'DevOnly2026' (bcrypt hash), for local testing only —
+// never seed these credentials into production.
 export const STAFF = [
-  { id: 'd1', name: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', role: 'doctor', specialty: 'Кардиолог', color: '#1D9E75', onDuty: true },
-  { id: 'd2', name: 'Др. Игорь Петров', role: 'doctor', specialty: 'Терапевт', color: '#185FA5', onDuty: true },
-  { id: 'd3', name: 'Др. Мария Волкова', role: 'doctor', specialty: 'Эндокринолог', color: '#B45FB4', onDuty: false },
-  { id: 'n1', name: 'Анна Кузнецова', role: 'nurse', specialty: 'Процедурная медсестра', color: '#1D9E75', onDuty: true },
-  { id: 'n2', name: 'Ольга Смирнова', role: 'nurse', specialty: 'Постовая медсестра', color: '#185FA5', onDuty: true },
+  { id: 'd1', name: 'Др. Түзелов Мұхамедәлі Құрбанәліұлы', role: 'doctor', specialty: 'Кардиолог', color: '#1D9E75', onDuty: true,
+    phone: '+70000000001', passwordHash: '$2a$10$VKZCuyYVA3ZaVzEAZxbjPO2gCijloeh2I7OcZxKgbUEtrH/cSd.5C' },
+  { id: 'd2', name: 'Др. Игорь Петров', role: 'doctor', specialty: 'Терапевт', color: '#185FA5', onDuty: true,
+    phone: '+70000000002', passwordHash: '$2a$10$VKZCuyYVA3ZaVzEAZxbjPO2gCijloeh2I7OcZxKgbUEtrH/cSd.5C' },
+  { id: 'd3', name: 'Др. Мария Волкова', role: 'doctor', specialty: 'Эндокринолог', color: '#B45FB4', onDuty: false,
+    phone: '+70000000003', passwordHash: '$2a$10$VKZCuyYVA3ZaVzEAZxbjPO2gCijloeh2I7OcZxKgbUEtrH/cSd.5C' },
+  { id: 'n1', name: 'Анна Кузнецова', role: 'nurse', specialty: 'Процедурная медсестра', color: '#1D9E75', onDuty: true,
+    phone: '+70000000004', passwordHash: '$2a$10$VKZCuyYVA3ZaVzEAZxbjPO2gCijloeh2I7OcZxKgbUEtrH/cSd.5C' },
+  { id: 'n2', name: 'Ольга Смирнова', role: 'nurse', specialty: 'Постовая медсестра', color: '#185FA5', onDuty: true,
+    phone: '+70000000005', passwordHash: '$2a$10$VKZCuyYVA3ZaVzEAZxbjPO2gCijloeh2I7OcZxKgbUEtrH/cSd.5C' },
   // Real credentials — this admin account requires an exact phone/password match to log in
   // (see auth.routes.js). Other staff below have no `phone`/`passwordHash` and stay in demo
   // mode (demo mode only works on the in-memory store — disabled once Supabase is configured).
-  // Hash is bcrypt('REDACTED-ROTATED', 10); the plaintext password is only ever typed at login.
+  // Password is never stored in source; only its bcrypt hash lives here. Rotate by generating
+  // a new hash (e.g. `node -e "console.log(require('bcryptjs').hashSync('newpass', 10))"`) and
+  // re-running scripts/seed-supabase.js against production.
   { id: 'a1', name: 'Әділет Болатұлы', role: 'admin', specialty: 'Администратор', color: '#6B7280', onDuty: true,
-    phone: '+77070060501', passwordHash: 'REDACTED-ROTATED-HASH' },
+    phone: '+77070060501', passwordHash: '$2a$10$qWyF.8Qv5/Q6d/r85HdTIO8iuJ7/OzsE3/F5cQbffsXKzTFT48LoG' },
 ];
 
 export const PATIENTS = [

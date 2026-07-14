@@ -1,5 +1,9 @@
 import jwt from 'jsonwebtoken';
 
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET must be set in production — refusing to start with an insecure default.');
+}
+
 const SECRET = process.env.JWT_SECRET || 'dev-only-insecure-secret-change-me';
 
 if (!process.env.JWT_SECRET) {
