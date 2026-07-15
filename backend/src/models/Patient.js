@@ -17,8 +17,8 @@ export function serializePatient(p) {
 }
 
 export function serializePatientSummary(p) {
-  const { id, name, age, gender, phone, checkIn, checkOut, allergies, status, lastAnalysis } = p;
-  return { id, name, age, gender, phone, checkIn, checkOut, allergies, status, lastAnalysis, statusMeta: statusMeta(status) };
+  const { id, name, age, gender, phone, checkIn, checkOut, allergies, status, lastAnalysis, roomId } = p;
+  return { id, name, age, gender, phone, checkIn, checkOut, allergies, status, lastAnalysis, roomId: roomId || null, statusMeta: statusMeta(status) };
 }
 
 // Read-only view served through the public, unauthenticated patient-portal link — deliberately
@@ -28,7 +28,7 @@ export function serializePatientPortal(p) {
   return { name, age, gender, checkIn, checkOut, allergies, analyses, diagnoses, procedures: procedures || [] };
 }
 
-export function createPatient({ name, age, gender, phone, checkIn, checkOut, allergies }) {
+export function createPatient({ name, age, gender, phone, checkIn, checkOut, allergies, roomId }) {
   if (!name || !name.trim()) throw new Error('Patient name is required');
   if (!checkIn || !checkOut) throw new Error('checkIn and checkOut are required');
   if (phone && !PHONE_RE.test(phone)) throw new Error('Введите корректный номер телефона');
@@ -45,6 +45,7 @@ export function createPatient({ name, age, gender, phone, checkIn, checkOut, all
     status: 'green',
     lastAnalysis: null,
     portalToken: generatePortalToken(),
+    roomId: roomId || null,
     analyses: [],
     diagnoses: [],
     appointments: [],

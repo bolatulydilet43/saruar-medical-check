@@ -24,11 +24,20 @@ export const STAFF = [
     phone: '+77070060501', passwordHash: '$2a$10$qWyF.8Qv5/Q6d/r85HdTIO8iuJ7/OzsE3/F5cQbffsXKzTFT48LoG' },
 ];
 
+export const ROOMS = [
+  { id: 'rm1', number: '101', capacity: 1, notes: '' },
+  { id: 'rm2', number: '102', capacity: 1, notes: '' },
+  { id: 'rm3', number: '103', capacity: 2, notes: '' },
+  { id: 'rm4', number: '201', capacity: 1, notes: 'Люкс' },
+  { id: 'rm5', number: '202', capacity: 2, notes: '' },
+  { id: 'rm6', number: '203', capacity: 1, notes: '' },
+];
+
 export const PATIENTS = [
   {
     id: 'p1', name: 'Виктор Андреевич Лебедев', age: 58, gender: 'М',
     checkIn: '2026-06-28', checkOut: '2026-07-19', allergies: 'Пенициллин',
-    status: 'red', lastAnalysis: '2026-07-08',
+    status: 'red', lastAnalysis: '2026-07-08', roomId: 'rm1',
     analyses: [
       { id: 'a1', date: '2026-07-08', type: 'Общий анализ крови', by: 'Анна Кузнецова',
         values: { hemoglobin: 104, leukocytes: 11.8, erythrocytes: 3.4, platelets: 410, esr: 28 } },
@@ -52,7 +61,7 @@ export const PATIENTS = [
   {
     id: 'p2', name: 'Наталья Сергеевна Орлова', age: 45, gender: 'Ж',
     checkIn: '2026-07-01', checkOut: '2026-07-15', allergies: 'Нет',
-    status: 'amber', lastAnalysis: '2026-07-07',
+    status: 'amber', lastAnalysis: '2026-07-07', roomId: 'rm2',
     analyses: [
       { id: 'a1', date: '2026-07-07', type: 'Общий анализ мочи', by: 'Анна Кузнецова',
         urine: { color: 'Соломенно-жёлтый', density: 1.028, protein: 0.2, glucose: 0.2, leukocytes: 7 } },
@@ -67,7 +76,7 @@ export const PATIENTS = [
   {
     id: 'p3', name: 'Дмитрий Олегович Титов', age: 62, gender: 'М',
     checkIn: '2026-06-20', checkOut: '2026-07-11', allergies: 'Аспирин, йод',
-    status: 'green', lastAnalysis: '2026-07-06',
+    status: 'green', lastAnalysis: '2026-07-06', roomId: 'rm3',
     analyses: [
       { id: 'a1', date: '2026-07-06', type: 'Артериальное давление', by: 'Ольга Смирнова',
         values: { systolic: 122, diastolic: 78, pulse: 72 } },
@@ -82,7 +91,7 @@ export const PATIENTS = [
   {
     id: 'p4', name: 'Мария Викторовна Крылова', age: 71, gender: 'Ж',
     checkIn: '2026-07-03', checkOut: '2026-07-24', allergies: 'Нет данных',
-    status: 'red', lastAnalysis: '2026-07-09',
+    status: 'red', lastAnalysis: '2026-07-09', roomId: 'rm4',
     analyses: [
       { id: 'a1', date: '2026-07-09', type: 'Общий анализ крови', by: 'Ольга Смирнова',
         values: { hemoglobin: 96, leukocytes: 13.5, erythrocytes: 3.1, platelets: 130, esr: 34 } },
@@ -106,7 +115,7 @@ export const PATIENTS = [
   {
     id: 'p6', name: 'Екатерина Дмитриевна Зайцева', age: 54, gender: 'Ж',
     checkIn: '2026-06-30', checkOut: '2026-07-21', allergies: 'Латекс',
-    status: 'amber', lastAnalysis: '2026-07-08',
+    status: 'amber', lastAnalysis: '2026-07-08', roomId: 'rm5',
     analyses: [
       { id: 'a1', date: '2026-07-08', type: 'УЗИ', by: 'Др. Мария Волкова',
         conclusion: 'Диффузные изменения паренхимы поджелудочной железы.' },
@@ -139,7 +148,7 @@ export const PATIENTS = [
   {
     id: 'p8', name: 'Ирина Павловна Никитина', age: 49, gender: 'Ж',
     checkIn: '2026-07-06', checkOut: '2026-07-20', allergies: 'Сульфаниламиды',
-    status: 'amber', lastAnalysis: '2026-07-07',
+    status: 'amber', lastAnalysis: '2026-07-07', roomId: 'rm6',
     analyses: [
       { id: 'a1', date: '2026-07-07', type: 'Общий анализ крови', by: 'Ольга Смирнова',
         values: { hemoglobin: 118, leukocytes: 9.8, erythrocytes: 4.0, platelets: 410, esr: 19 } },

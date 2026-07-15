@@ -111,4 +111,29 @@ export const supabaseStore = {
     check(error);
     return appt;
   },
+
+  async getRooms() {
+    const { data, error } = await supabase.from('rooms').select('data').order('created_at', { ascending: true });
+    check(error);
+    return data.map((row) => row.data);
+  },
+  async addRoom(room) {
+    const { error } = await supabase.from('rooms').insert({ id: room.id, data: room });
+    check(error);
+    return room;
+  },
+  async updateRoom(id, patch) {
+    const { data, error } = await supabase.from('rooms').select('data').eq('id', id).maybeSingle();
+    check(error);
+    if (!data) return null;
+    const updated = { ...data.data, ...patch };
+    const { error: updErr } = await supabase.from('rooms').update({ data: updated }).eq('id', id);
+    check(updErr);
+    return updated;
+  },
+  async deleteRoom(id) {
+    const { data, error } = await supabase.from('rooms').delete().eq('id', id).select('id');
+    check(error);
+    return data.length > 0;
+  },
 };

@@ -4,7 +4,7 @@
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import ws from 'ws';
-import { STAFF, PATIENTS, APPOINTMENTS_WEEK } from '../src/data/seed.js';
+import { STAFF, PATIENTS, APPOINTMENTS_WEEK, ROOMS } from '../src/data/seed.js';
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
   console.error('Set SUPABASE_URL and SUPABASE_SERVICE_KEY before running this script.');
@@ -23,5 +23,6 @@ async function seedTable(table, records) {
 await seedTable('staff', STAFF);
 await seedTable('patients', PATIENTS);
 await seedTable('appointments_week', APPOINTMENTS_WEEK);
+await seedTable('rooms', ROOMS);
 
 console.log('Done.');

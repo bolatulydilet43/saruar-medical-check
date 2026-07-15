@@ -1,12 +1,13 @@
 // In-memory data store. Resets to seed data on server restart — used automatically
 // when SUPABASE_URL/SUPABASE_SERVICE_KEY are not set (see store.js), so local dev
 // keeps working without a database.
-import { STAFF, PATIENTS, APPOINTMENTS_WEEK } from './seed.js';
+import { STAFF, PATIENTS, APPOINTMENTS_WEEK, ROOMS } from './seed.js';
 
 const state = {
   staff: structuredClone(STAFF),
   patients: structuredClone(PATIENTS),
   appointmentsWeek: structuredClone(APPOINTMENTS_WEEK),
+  rooms: structuredClone(ROOMS),
 };
 
 export const memoryStore = {
@@ -83,5 +84,23 @@ export const memoryStore = {
   addAppointment: (appt) => {
     state.appointmentsWeek.push(appt);
     return appt;
+  },
+
+  getRooms: () => state.rooms,
+  addRoom: (room) => {
+    state.rooms.push(room);
+    return room;
+  },
+  updateRoom: (id, patch) => {
+    const room = state.rooms.find((r) => r.id === id);
+    if (!room) return null;
+    Object.assign(room, patch);
+    return room;
+  },
+  deleteRoom: (id) => {
+    const idx = state.rooms.findIndex((r) => r.id === id);
+    if (idx === -1) return false;
+    state.rooms.splice(idx, 1);
+    return true;
   },
 };

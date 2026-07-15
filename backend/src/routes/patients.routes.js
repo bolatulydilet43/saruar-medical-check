@@ -4,6 +4,7 @@ import { serializePatientSummary, createPatient, generatePortalToken } from '../
 import { createAnalysis } from '../models/Analysis.js';
 import { createDiagnosis } from '../models/Diagnosis.js';
 import { createProcedure, assertValidStatus } from '../models/Procedure.js';
+import { roomIsFree } from '../models/Room.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -29,11 +30,32 @@ router.get('/:id', requireAuth, async (req, res) => {
 router.post('/', requireRole('admin', 'doctor'), async (req, res) => {
   try {
     const patient = createPatient(req.body || {});
+    if (patient.roomId) {
+      const patients = await store.getPatients();
+      if (!roomIsFree(patients, patient.roomId, patient.checkIn, patient.checkOut)) {
+        return res.status(400).json({ error: 'Номер занят на эти даты' });
+      }
+    }
     await store.addPatient(patient);
     res.status(201).json(serializePatientSummary(patient));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
+});
+
+// Reassigns (or clears, with roomId: null) a patient's room for the remainder of their stay.
+router.patch('/:id/room', requireRole('admin', 'doctor'), async (req, res) => {
+  const patient = await store.getPatient(req.params.id);
+  if (!patient) return res.status(404).json({ error: 'Patient not found' });
+  const { roomId } = req.body || {};
+  if (roomId) {
+    const patients = await store.getPatients();
+    if (!roomIsFree(patients, roomId, patient.checkIn, patient.checkOut, patient.id)) {
+      return res.status(400).json({ error: 'Номер занят на эти даты' });
+    }
+  }
+  const updated = await store.updatePatient(patient.id, { roomId: roomId || null });
+  res.json(serializePatientSummary(updated));
 });
 
 // Regenerates the patient's self-service portal link/QR token — also serves as a revoke,

@@ -6,6 +6,7 @@ import patientsRoutes from './routes/patients.routes.js';
 import patientPortalRoutes from './routes/patientPortal.routes.js';
 import appointmentsRoutes from './routes/appointments.routes.js';
 import rangesRoutes from './routes/ranges.routes.js';
+import roomsRoutes from './routes/rooms.routes.js';
 
 // Routes are unprefixed here so this router can be mounted at /api locally
 // (server.js) or at the function's own base path on Netlify (see
@@ -17,6 +18,7 @@ apiRouter.use('/patients', patientsRoutes);
 apiRouter.use('/patient-portal', patientPortalRoutes);
 apiRouter.use('/appointments', appointmentsRoutes);
 apiRouter.use('/ranges', rangesRoutes);
+apiRouter.use('/rooms', roomsRoutes);
 apiRouter.get('/health', (req, res) => res.json({ ok: true }));
 
 const DEFAULT_ALLOWED_ORIGINS = ['http://localhost:5173', 'https://saruar-medical-check.netlify.app'];
