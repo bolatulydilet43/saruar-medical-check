@@ -9,11 +9,13 @@ import ErrorBanner from '../components/ErrorBanner.jsx';
 import ConfirmModal from '../components/ConfirmModal.jsx';
 import TrendChart from '../components/TrendChart.jsx';
 import PatientPortalLink from '../components/PatientPortalLink.jsx';
+import ProceduresTab from '../components/ProceduresTab.jsx';
 import { buildAnalysisDisplay, buildTrendSeries } from '../utils/analysisDisplay.js';
 
 const TABS = [
   { id: 'history', label: 'Анализы' },
   { id: 'diagnoses', label: 'Диагнозы и назначения' },
+  { id: 'procedures', label: 'Процедуры' },
   { id: 'appointments', label: 'Записи на приём' },
 ];
 
@@ -150,6 +152,10 @@ export default function PatientProfile() {
           ))}
           {patient.diagnoses.length === 0 && <EmptyState text="Диагнозы ещё не внесены" />}
         </div>
+      )}
+
+      {tab === 'procedures' && (
+        <ProceduresTab patient={patient} canPlan={canManage} onChange={setPatient} />
       )}
 
       {tab === 'appointments' && (

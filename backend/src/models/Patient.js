@@ -24,8 +24,8 @@ export function serializePatientSummary(p) {
 // Read-only view served through the public, unauthenticated patient-portal link — deliberately
 // narrow: no phone, no portalToken itself, no staff names beyond what's already on a diagnosis.
 export function serializePatientPortal(p) {
-  const { name, age, gender, checkIn, checkOut, allergies, analyses, diagnoses } = p;
-  return { name, age, gender, checkIn, checkOut, allergies, analyses, diagnoses };
+  const { name, age, gender, checkIn, checkOut, allergies, analyses, diagnoses, procedures } = p;
+  return { name, age, gender, checkIn, checkOut, allergies, analyses, diagnoses, procedures: procedures || [] };
 }
 
 export function createPatient({ name, age, gender, phone, checkIn, checkOut, allergies }) {
@@ -48,5 +48,6 @@ export function createPatient({ name, age, gender, phone, checkIn, checkOut, all
     analyses: [],
     diagnoses: [],
     appointments: [],
+    procedures: [],
   };
 }

@@ -63,6 +63,22 @@ export const memoryStore = {
     return patient;
   },
 
+  addProcedure: (patientId, procedure) => {
+    const patient = state.patients.find((p) => p.id === patientId);
+    if (!patient) return null;
+    if (!patient.procedures) patient.procedures = [];
+    patient.procedures.push(procedure);
+    return patient;
+  },
+  updateProcedure: (patientId, procedureId, patch) => {
+    const patient = state.patients.find((p) => p.id === patientId);
+    if (!patient) return null;
+    const procedure = (patient.procedures || []).find((pr) => pr.id === procedureId);
+    if (!procedure) return null;
+    Object.assign(procedure, patch);
+    return procedure;
+  },
+
   getAppointmentsWeek: () => state.appointmentsWeek,
   addAppointment: (appt) => {
     state.appointmentsWeek.push(appt);

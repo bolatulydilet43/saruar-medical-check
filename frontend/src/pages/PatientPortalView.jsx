@@ -7,6 +7,12 @@ import Logo from '../components/Logo.jsx';
 import AnalysisCard from '../components/AnalysisCard.jsx';
 import { buildAnalysisDisplay } from '../utils/analysisDisplay.js';
 
+const PROCEDURE_STATUS_META = {
+  planned: { label: 'Запланировано', bg: '#F0F7FE', fg: '#185FA5' },
+  done: { label: 'Выполнено', bg: '#E6F5EE', fg: '#1D7A57' },
+  missed: { label: 'Пропущено', bg: '#FDECEC', fg: '#C0392B' },
+};
+
 // Public, unauthenticated read-only view — what a patient sees after scanning the QR at
 // reception. No sidebar, no login, no write actions of any kind.
 export default function PatientPortalView() {
@@ -52,6 +58,26 @@ export default function PatientPortalView() {
                 </div>
               )}
             </div>
+
+            {patient.procedures?.length > 0 && (
+              <>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 12 }}>Процедуры</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+                  {[...patient.procedures]
+                    .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')))
+                    .map((pr) => {
+                      const meta = PROCEDURE_STATUS_META[pr.status] || PROCEDURE_STATUS_META.planned;
+                      return (
+                        <div key={pr.id} style={{ background: 'white', borderRadius: 14, border: '1px solid #EDF0EF', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', fontSize: 14 }}>
+                          <div style={{ fontWeight: 700, color: '#111827', minWidth: 100 }}>{fmtDate(pr.date)}{pr.time ? ` · ${pr.time}` : ''}</div>
+                          <div style={{ color: '#374151', flex: 1, minWidth: 120 }}>{pr.type}</div>
+                          <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600, background: meta.bg, color: meta.fg }}>{meta.label}</span>
+                        </div>
+                      );
+                    })}
+                </div>
+              </>
+            )}
 
             <div style={{ fontSize: 15, fontWeight: 700, color: '#111827', marginBottom: 12 }}>Анализы</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>

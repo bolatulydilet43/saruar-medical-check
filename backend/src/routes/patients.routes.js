@@ -3,6 +3,7 @@ import { store } from '../data/store.js';
 import { serializePatientSummary, createPatient, generatePortalToken } from '../models/Patient.js';
 import { createAnalysis } from '../models/Analysis.js';
 import { createDiagnosis } from '../models/Diagnosis.js';
+import { createProcedure, assertValidStatus } from '../models/Procedure.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -68,6 +69,33 @@ router.post('/:id/diagnoses', requireAuth, async (req, res) => {
     const diagnosis = createDiagnosis(req.body || {});
     await store.addDiagnosis(patient.id, diagnosis);
     res.status(201).json(diagnosis);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Only admins and doctors plan the course of procedures for a stay.
+router.post('/:id/procedures', requireRole('admin', 'doctor'), async (req, res) => {
+  const patient = await store.getPatient(req.params.id);
+  if (!patient) return res.status(404).json({ error: 'Patient not found' });
+  try {
+    const procedure = createProcedure(req.body || {});
+    await store.addProcedure(patient.id, procedure);
+    res.status(201).json(procedure);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Any authenticated staff member (e.g. the nurse who actually administered it) can mark a
+// planned procedure done/missed.
+router.patch('/:id/procedures/:procedureId', requireAuth, async (req, res) => {
+  try {
+    const { status } = req.body || {};
+    assertValidStatus(status);
+    const procedure = await store.updateProcedure(req.params.id, req.params.procedureId, { status });
+    if (!procedure) return res.status(404).json({ error: 'Procedure not found' });
+    res.json(procedure);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

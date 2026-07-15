@@ -5,6 +5,7 @@ import { createStaff } from '../src/models/Staff.js';
 import { createDiagnosis } from '../src/models/Diagnosis.js';
 import { createAnalysis } from '../src/models/Analysis.js';
 import { createAppointment } from '../src/models/Appointment.js';
+import { createProcedure, assertValidStatus } from '../src/models/Procedure.js';
 
 const UUID_BODY = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
@@ -52,4 +53,22 @@ test('createAnalysis rejects non-numeric values and accepts valid numeric input'
 test('createAppointment generates a UUID id', () => {
   const ap = createAppointment({ date: '2026-01-01', time: '10:00', patient: 'X', doctorId: 'd1', staff: [{ id: 'd1', name: 'Dr X', color: '#000' }] });
   assert.match(ap.id, new RegExp(`^w-${UUID_BODY}$`));
+});
+
+test('createProcedure requires type and date, generates a UUID id, defaults to planned', () => {
+  assert.throws(() => createProcedure({ date: '2026-01-01' }), /Тип процедуры/);
+  assert.throws(() => createProcedure({ type: 'Массаж' }), /Дата/);
+  const pr = createProcedure({ type: 'Массаж', date: '2026-01-01', time: '10:00' });
+  assert.match(pr.id, new RegExp(`^pr-${UUID_BODY}$`));
+  assert.equal(pr.status, 'planned');
+});
+
+test('createProcedure enforces length limits on type and notes', () => {
+  assert.throws(() => createProcedure({ type: 'a'.repeat(101), date: '2026-01-01' }), /Тип процедуры/);
+  assert.throws(() => createProcedure({ type: 'Массаж', date: '2026-01-01', notes: 'a'.repeat(501) }), /Заметка/);
+});
+
+test('assertValidStatus only accepts planned/done/missed', () => {
+  assert.doesNotThrow(() => assertValidStatus('done'));
+  assert.throws(() => assertValidStatus('bogus'));
 });

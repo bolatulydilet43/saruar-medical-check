@@ -81,6 +81,26 @@ export const supabaseStore = {
     return patient;
   },
 
+  async addProcedure(patientId, procedure) {
+    const patient = await this.getPatient(patientId);
+    if (!patient) return null;
+    if (!patient.procedures) patient.procedures = [];
+    patient.procedures.push(procedure);
+    const { error } = await supabase.from('patients').update({ data: patient }).eq('id', patientId);
+    check(error);
+    return patient;
+  },
+  async updateProcedure(patientId, procedureId, patch) {
+    const patient = await this.getPatient(patientId);
+    if (!patient) return null;
+    const procedure = (patient.procedures || []).find((pr) => pr.id === procedureId);
+    if (!procedure) return null;
+    Object.assign(procedure, patch);
+    const { error } = await supabase.from('patients').update({ data: patient }).eq('id', patientId);
+    check(error);
+    return procedure;
+  },
+
   async getAppointmentsWeek() {
     const { data, error } = await supabase.from('appointments_week').select('data').order('created_at', { ascending: true });
     check(error);

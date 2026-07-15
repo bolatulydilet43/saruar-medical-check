@@ -48,6 +48,10 @@ export const api = {
     request(`/patients/${patientId}/analyses`, { method: 'POST', body: JSON.stringify(payload) }),
   addDiagnosis: (patientId, payload) =>
     request(`/patients/${patientId}/diagnoses`, { method: 'POST', body: JSON.stringify(payload) }),
+  addProcedure: (patientId, payload) =>
+    request(`/patients/${patientId}/procedures`, { method: 'POST', body: JSON.stringify(payload) }),
+  updateProcedureStatus: (patientId, procedureId, status) =>
+    request(`/patients/${patientId}/procedures/${procedureId}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
   getAppointments: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
