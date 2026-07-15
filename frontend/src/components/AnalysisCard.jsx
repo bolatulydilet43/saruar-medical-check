@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { fmtDate } from '../theme.js';
 
 const CHIP_COLORS = {
@@ -8,6 +9,7 @@ const CHIP_COLORS = {
 };
 
 export default function AnalysisCard({ a, compact = false }) {
+  const { t } = useTranslation();
   const pad = compact ? '14px 16px' : '18px 20px';
   const titleSize = compact ? 13.5 : 14.5;
 
@@ -26,7 +28,7 @@ export default function AnalysisCard({ a, compact = false }) {
               <div key={r.key} style={{ background: c.bg, color: c.fg, padding: '10px 12px', borderRadius: 10 }}>
                 <div style={{ fontSize: 11.5, opacity: 0.75 }}>{r.label}</div>
                 <div style={{ fontSize: 15, fontWeight: 700 }}>{r.value} <span style={{ fontWeight: 400, fontSize: 11.5 }}>{r.unit}</span></div>
-                {!compact && <div style={{ fontSize: 10.5, opacity: 0.7 }}>норма {r.range}</div>}
+                {!compact && <div style={{ fontSize: 10.5, opacity: 0.7 }}>{t('common.normalPrefix')} {r.range}</div>}
               </div>
             );
           })}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { fmtDateShort } from '../theme.js';
 
 const STATUS_COLOR = { green: '#1D9E75', amber: '#E0A72E', red: '#E0524A', neutral: '#9CA3AF' };
@@ -10,6 +11,7 @@ const PAD = { top: 14, right: 14, bottom: 22, left: 14 };
 // over time), each point is colored by clinical status (green/amber/red) — that's the
 // actual information. A subtle band shows the normal range for visual context.
 export default function TrendChart({ series }) {
+  const { t } = useTranslation();
   const [hoverIdx, setHoverIdx] = useState(null);
   const { label, unit, range, points } = series;
 
@@ -43,7 +45,7 @@ export default function TrendChart({ series }) {
     <div style={{ background: 'white', border: '1px solid #EDF0EF', borderRadius: 14, padding: '14px 16px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
         <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111827' }}>{label}</div>
-        <div style={{ fontSize: 12, color: '#9CA3AF' }}>{range ? `норма ${range.min}–${range.max} ${unit}` : unit}</div>
+        <div style={{ fontSize: 12, color: '#9CA3AF' }}>{range ? `${t('common.normalPrefix')} ${range.min}–${range.max} ${unit}` : unit}</div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: H, display: 'block', overflow: 'visible' }}>
         {range && (

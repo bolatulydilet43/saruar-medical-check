@@ -8,6 +8,7 @@ import PatientProfile from './pages/PatientProfile.jsx';
 import AnalysisEntry from './pages/AnalysisEntry.jsx';
 import DoctorReview from './pages/DoctorReview.jsx';
 import Appointments from './pages/Appointments.jsx';
+import Rooms from './pages/Rooms.jsx';
 import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
 import PatientPortalView from './pages/PatientPortalView.jsx';
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/analysis-entry" element={<AnalysisEntry />} />
         <Route path="/review/:id" element={<DoctorReview />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/rooms" element={<Rooms />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

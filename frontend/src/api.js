@@ -60,4 +60,11 @@ export const api = {
   addAppointment: (payload) => request('/appointments', { method: 'POST', body: JSON.stringify(payload) }),
 
   getRanges: () => request('/ranges'),
+
+  getRooms: () => request('/rooms'),
+  createRoom: (payload) => request('/rooms', { method: 'POST', body: JSON.stringify(payload) }),
+  updateRoom: (id, payload) => request(`/rooms/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  deleteRoom: (id) => request(`/rooms/${id}`, { method: 'DELETE' }),
+  assignRoom: (patientId, roomId) =>
+    request(`/patients/${patientId}/room`, { method: 'PATCH', body: JSON.stringify({ roomId }) }),
 };

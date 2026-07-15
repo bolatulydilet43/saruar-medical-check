@@ -1,7 +1,10 @@
-// i18n setup. kk.json is a machine/draft translation of the app's shared chrome
-// (navigation, login, status labels) — NOT reviewed by a native Kazakh speaker yet,
-// and most page-specific content is still Russian-only regardless of language choice.
-// See README "Локализация" before treating this as production-ready for Kazakh users.
+// i18n setup. kk.json is a machine/draft translation — NOT reviewed by a native Kazakh
+// speaker yet. It covers all static frontend UI chrome (nav, forms, labels, buttons,
+// empty states). It intentionally does NOT cover: validation/error messages from the
+// backend API (always Russian), or clinical data itself (patient names, diagnosis text,
+// analysis type names, medical range labels) — that data is entered/stored in Russian
+// regardless of the UI language. See README "Локализация" before treating this as
+// production-ready for Kazakh users.
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import ru from './locales/ru.json';

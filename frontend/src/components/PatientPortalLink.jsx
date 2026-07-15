@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api.js';
+import { CARD_STYLE, PRIMARY_BUTTON_STYLE, SECONDARY_BUTTON_STYLE } from '../theme.js';
 import ConfirmModal from './ConfirmModal.jsx';
 
 // Read-only self-service link/QR a patient scans at reception — no login, valid through
 // checkOut. qrcode is dynamically imported so it doesn't bloat the main bundle for staff
 // who never open this panel.
 export default function PatientPortalLink({ patientId, portalToken, onTokenChange }) {
+  const { t } = useTranslation();
   const [qrDataUrl, setQrDataUrl] = useState(null);
   const [copied, setCopied] = useState(false);
   const [confirmingRegen, setConfirmingRegen] = useState(false);
@@ -46,12 +49,12 @@ export default function PatientPortalLink({ patientId, portalToken, onTokenChang
   }
 
   return (
-    <div style={{ background: 'white', border: '1px solid #EDF0EF', borderRadius: 14, padding: '18px 20px', display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-      {qrDataUrl && <img src={qrDataUrl} alt="QR-код для пациента" width={100} height={100} style={{ borderRadius: 8 }} />}
+    <div style={{ ...CARD_STYLE, padding: '18px 20px', display: 'flex', gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      {qrDataUrl && <img src={qrDataUrl} alt={t('portalLink.qrAlt')} width={100} height={100} style={{ borderRadius: 8 }} />}
       <div style={{ flex: 1, minWidth: 220 }}>
-        <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111827', marginBottom: 4 }}>Ссылка для пациента</div>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111827', marginBottom: 4 }}>{t('portalLink.title')}</div>
         <div style={{ fontSize: 12.5, color: '#6B7280', marginBottom: 10 }}>
-          Пациент сканирует QR или переходит по ссылке — видит свои анализы и назначения без входа в систему, до даты выезда.
+          {t('portalLink.description')}
         </div>
         {url && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -59,14 +62,14 @@ export default function PatientPortalLink({ patientId, portalToken, onTokenChang
               onClick={copyLink}
               style={{ padding: '7px 12px', background: '#F0F7F4', color: '#1D7A57', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
             >
-              {copied ? 'Скопировано ✓' : 'Скопировать ссылку'}
+              {copied ? t('portalLink.copied') : t('portalLink.copyLink')}
             </button>
             <button
               onClick={() => setConfirmingRegen(true)}
               disabled={busy}
-              style={{ padding: '7px 12px', background: '#F9FAFB', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: busy ? 'default' : 'pointer' }}
+              style={{ ...SECONDARY_BUTTON_STYLE, padding: '7px 12px', color: '#374151', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: busy ? 'default' : 'pointer' }}
             >
-              Обновить ссылку
+              {t('portalLink.regenerate')}
             </button>
           </div>
         )}
@@ -74,9 +77,9 @@ export default function PatientPortalLink({ patientId, portalToken, onTokenChang
           <button
             onClick={regenerate}
             disabled={busy}
-            style={{ padding: '7px 12px', background: '#1D9E75', color: 'white', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: busy ? 'default' : 'pointer' }}
+            style={{ ...PRIMARY_BUTTON_STYLE, padding: '7px 12px', borderRadius: 8, fontSize: 12.5, cursor: busy ? 'default' : 'pointer' }}
           >
-            {busy ? 'Создание…' : 'Создать ссылку'}
+            {busy ? t('portalLink.creating') : t('portalLink.create')}
           </button>
         )}
         {error && <div style={{ color: '#C0392B', fontSize: 12.5, marginTop: 8 }}>{error}</div>}
@@ -84,8 +87,8 @@ export default function PatientPortalLink({ patientId, portalToken, onTokenChang
 
       <ConfirmModal
         open={confirmingRegen}
-        title="Обновить ссылку? Старая ссылка/QR перестанут работать — если уже выданы пациенту, их нужно будет заменить."
-        confirmLabel="Обновить"
+        title={t('portalLink.regenerateConfirm')}
+        confirmLabel={t('portalLink.regenerateShort')}
         onConfirm={regenerate}
         onCancel={() => setConfirmingRegen(false)}
       />

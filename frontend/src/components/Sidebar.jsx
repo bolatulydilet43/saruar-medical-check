@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import Logo from './Logo.jsx';
 import { brand } from '../brandConfig.js';
 import LanguageSwitcher from './LanguageSwitcher.jsx';
+import { SECONDARY_BUTTON_STYLE } from '../theme.js';
 
 const NAV_ITEMS = [
   { to: '/dashboard', labelKey: 'nav.dashboard', icon: 'grid', matches: ['/dashboard'] },
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
   { to: '/patients', labelKey: 'nav.patients', icon: 'users', matches: ['/patients', '/review'] },
   { to: '/analysis-entry', labelKey: 'nav.analysisEntry', icon: 'droplet', matches: ['/analysis-entry'] },
   { to: '/appointments', labelKey: 'nav.appointments', icon: 'calendar', matches: ['/appointments'] },
+  { to: '/rooms', labelKey: 'nav.rooms', icon: 'bed', matches: ['/rooms'] },
   { to: '/reports', labelKey: 'nav.reports', icon: 'doc', matches: ['/reports'] },
   { to: '/settings', labelKey: 'nav.settings', icon: 'sliders', matches: ['/settings'] },
 ];
@@ -42,6 +44,15 @@ const ICONS = {
       <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="1.8" />
       <line x1="8" y1="3" x2="8" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       <line x1="16" y1="3" x2="16" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+  bed: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path d="M3 19v-8a2 2 0 0 1 2-2h4v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 15h18v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M11 13h10v-2a2 2 0 0 0-2-2h-8v4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <line x1="3" y1="19" x2="3" y2="21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <line x1="21" y1="19" x2="21" y2="21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   ),
   doc: (
@@ -114,10 +125,7 @@ export default function Sidebar() {
         onClick={() => setExpanded((e) => !e)}
         aria-label={expanded ? t('sidebar.collapse') : t('sidebar.expand')}
         aria-expanded={expanded}
-        style={{
-          margin: '8px 12px', padding: '8px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8,
-          fontSize: 12, color: '#6B7280', cursor: 'pointer',
-        }}
+        style={{ ...SECONDARY_BUTTON_STYLE, margin: '8px 12px', padding: '8px', borderRadius: 8, fontSize: 12, color: '#6B7280' }}
       >
         {expanded ? `‹ ${t('sidebar.collapse')}` : '›'}
       </button>
@@ -142,9 +150,9 @@ export default function Sidebar() {
         </div>
         <button
           onClick={logout}
-          style={{ marginTop: 12, width: '100%', padding: 8, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 12.5, color: '#6B7280', cursor: 'pointer' }}
+          style={{ ...SECONDARY_BUTTON_STYLE, marginTop: 12, width: '100%', padding: 8, borderRadius: 8, fontSize: 12.5, color: '#6B7280' }}
         >
-          Выйти
+          {t('sidebar.logout')}
         </button>
       </div>
     </div>

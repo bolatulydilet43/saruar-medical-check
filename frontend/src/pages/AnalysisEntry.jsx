@@ -1,20 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../api.js';
-import { statusForValue } from '../theme.js';
+import { statusForValue, CARD_STYLE, INPUT_STYLE, LABEL_STYLE, PRIMARY_BUTTON_STYLE } from '../theme.js';
 import ErrorBanner from '../components/ErrorBanner.jsx';
-
-const TYPES = [
-  { id: 'blood', label: 'Общий анализ крови' },
-  { id: 'urine', label: 'Анализ мочи' },
-  { id: 'ecg', label: 'ЭКГ' },
-  { id: 'bp', label: 'Давление' },
-  { id: 'us', label: 'УЗИ' },
-  { id: 'sugar', label: 'Сахар' },
-  { id: 'biochem', label: 'Биохимия' },
-  { id: 'hormones', label: 'Гормоны' },
-];
 
 const NUMERIC_FIELDS = {
   blood: ['hemoglobin', 'leukocytes', 'erythrocytes', 'platelets', 'esr'],
@@ -38,6 +28,17 @@ function exampleValue(min, max) {
 }
 
 export default function AnalysisEntry() {
+  const { t } = useTranslation();
+  const TYPES = [
+    { id: 'blood', label: t('analysisEntry.types.blood') },
+    { id: 'urine', label: t('analysisEntry.types.urine') },
+    { id: 'ecg', label: t('analysisEntry.types.ecg') },
+    { id: 'bp', label: t('analysisEntry.types.bp') },
+    { id: 'us', label: t('analysisEntry.types.us') },
+    { id: 'sugar', label: t('analysisEntry.types.sugar') },
+    { id: 'biochem', label: t('analysisEntry.types.biochem') },
+    { id: 'hormones', label: t('analysisEntry.types.hormones') },
+  ];
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [patients, setPatients] = useState([]);
@@ -68,8 +69,8 @@ export default function AnalysisEntry() {
     setSaved(false);
   }
 
-  function changeType(t) {
-    setType(t);
+  function changeType(newType) {
+    setType(newType);
     setValues({});
     setSaved(false);
   }
@@ -106,37 +107,34 @@ export default function AnalysisEntry() {
     return { key, r, val, borderColor };
   });
 
-  const inputStyle = { width: '100%', padding: '10px 12px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, outline: 'none' };
-  const labelStyle = { display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6 };
-
   return (
     <div style={{ maxWidth: 760 }}>
-      <div style={{ fontSize: 26, fontWeight: 800, color: '#111827', marginBottom: 6 }}>Внести результаты анализа</div>
-      <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 24 }}>Значения вне нормы подсвечиваются автоматически</div>
+      <div style={{ fontSize: 26, fontWeight: 800, color: '#111827', marginBottom: 6 }}>{t('analysisEntry.title')}</div>
+      <div style={{ fontSize: 14, color: '#6B7280', marginBottom: 24 }}>{t('analysisEntry.subtitle')}</div>
 
       <ErrorBanner message={error} />
 
-      <div style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', padding: '24px 26px' }}>
+      <div style={{ ...CARD_STYLE, borderRadius: 16, padding: '24px 26px' }}>
         <div style={{ marginBottom: 18 }}>
-          <label style={{ ...labelStyle, fontWeight: 600 }}>Пациент</label>
-          <select value={patientId} onChange={(e) => setPatientId(e.target.value)} style={{ ...inputStyle, background: 'white' }}>
+          <label style={{ ...LABEL_STYLE, fontWeight: 600 }}>{t('analysisEntry.fieldPatient')}</label>
+          <select value={patientId} onChange={(e) => setPatientId(e.target.value)} style={{ ...INPUT_STYLE, background: 'white' }}>
             {patients.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
 
         <div style={{ marginBottom: 20 }}>
-          <label style={{ ...labelStyle, fontWeight: 600, marginBottom: 8 }}>Тип анализа</label>
+          <label style={{ ...LABEL_STYLE, fontWeight: 600, marginBottom: 8 }}>{t('analysisEntry.fieldAnalysisType')}</label>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {TYPES.map((t) => (
-              <button key={t.id} onClick={() => changeType(t.id)} style={typeBtnStyle(type === t.id)}>{t.label}</button>
+            {TYPES.map((tp) => (
+              <button key={tp.id} onClick={() => changeType(tp.id)} style={typeBtnStyle(type === tp.id)}>{tp.label}</button>
             ))}
           </div>
         </div>
 
         {type === 'urine' && (
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Цвет</label>
-            <input value={values.urineColorText || ''} onChange={(e) => setValue('urineColorText', e.target.value)} placeholder="Например, соломенно-жёлтый" style={inputStyle} />
+            <label style={LABEL_STYLE}>{t('analysisEntry.fieldColor')}</label>
+            <input value={values.urineColorText || ''} onChange={(e) => setValue('urineColorText', e.target.value)} placeholder={t('analysisEntry.colorPlaceholder')} style={INPUT_STYLE} />
           </div>
         )}
 
@@ -144,11 +142,11 @@ export default function AnalysisEntry() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14, marginBottom: 8 }}>
             {fieldsList.map((f) => (
               <div key={f.key}>
-                <label style={labelStyle}>{f.r.label} <span style={{ color: '#9CA3AF', fontWeight: 400 }}>(норма {f.r.min}–{f.r.max} {f.r.unit})</span></label>
+                <label style={LABEL_STYLE}>{f.r.label} <span style={{ color: '#9CA3AF', fontWeight: 400 }}>{t('analysisEntry.normalRange', { min: f.r.min, max: f.r.max, unit: f.r.unit })}</span></label>
                 <input
                   value={f.val} onChange={(e) => setValue(f.key, e.target.value)}
-                  placeholder={`Например, ${exampleValue(f.r.min, f.r.max)}`}
-                  style={{ ...inputStyle, border: `1.5px solid ${f.borderColor}` }}
+                  placeholder={t('analysisEntry.examplePlaceholder', { value: exampleValue(f.r.min, f.r.max) })}
+                  style={{ ...INPUT_STYLE, border: `1.5px solid ${f.borderColor}` }}
                 />
               </div>
             ))}
@@ -157,8 +155,8 @@ export default function AnalysisEntry() {
 
         {type === 'ecg' && (
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Ритм сердца</label>
-            <select value={values.rhythm || RHYTHMS[0]} onChange={(e) => setValue('rhythm', e.target.value)} style={{ ...inputStyle, background: 'white' }}>
+            <label style={LABEL_STYLE}>{t('analysisEntry.fieldRhythm')}</label>
+            <select value={values.rhythm || RHYTHMS[0]} onChange={(e) => setValue('rhythm', e.target.value)} style={{ ...INPUT_STYLE, background: 'white' }}>
               {RHYTHMS.map((r) => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
@@ -166,14 +164,14 @@ export default function AnalysisEntry() {
 
         {(type === 'ecg' || type === 'us') && (
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Заключение</label>
-            <textarea value={values.conclusion || ''} onChange={(e) => setValue('conclusion', e.target.value)} rows={3} placeholder="Введите текст заключения…" style={{ ...inputStyle, resize: 'vertical' }} />
+            <label style={LABEL_STYLE}>{t('analysisEntry.fieldConclusion')}</label>
+            <textarea value={values.conclusion || ''} onChange={(e) => setValue('conclusion', e.target.value)} rows={3} placeholder={t('analysisEntry.conclusionPlaceholder')} style={{ ...INPUT_STYLE, resize: 'vertical' }} />
           </div>
         )}
 
         <div style={{ height: 1, background: '#EEF1F0', margin: '18px 0' }} />
-        <button onClick={submit} style={{ padding: '12px 22px', background: '#1D9E75', color: 'white', border: 'none', borderRadius: 10, fontSize: 14.5, fontWeight: 600, cursor: 'pointer' }}>Сохранить результат</button>
-        {saved && <span style={{ marginLeft: 14, fontSize: 13.5, color: '#1D7A57', fontWeight: 600 }}>Сохранено ✓</span>}
+        <button onClick={submit} style={{ ...PRIMARY_BUTTON_STYLE, padding: '12px 22px', borderRadius: 10, fontSize: 14.5 }}>{t('analysisEntry.save')}</button>
+        {saved && <span style={{ marginLeft: 14, fontSize: 13.5, color: '#1D7A57', fontWeight: 600 }}>{t('analysisEntry.saved')}</span>}
       </div>
     </div>
   );

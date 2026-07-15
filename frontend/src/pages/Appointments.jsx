@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api.js';
-import { fmtDateShort } from '../theme.js';
+import { fmtDateShort, CARD_STYLE, MODAL_OVERLAY_STYLE, PRIMARY_BUTTON_STYLE, SECONDARY_BUTTON_STYLE } from '../theme.js';
 import ErrorBanner from '../components/ErrorBanner.jsx';
-
-const WEEKDAY_LABELS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 function mondayOf(date) {
   const d = new Date(date);
@@ -16,6 +15,8 @@ function toIso(d) {
 }
 
 export default function Appointments() {
+  const { t } = useTranslation();
+  const weekdayLabels = t('appointments.weekdays', { returnObjects: true });
   const [staff, setStaff] = useState([]);
   const [appts, setAppts] = useState([]);
   const [weekOffset, setWeekOffset] = useState(0);
@@ -52,9 +53,9 @@ export default function Appointments() {
       const d = new Date(base);
       d.setDate(base.getDate() + i);
       const iso = toIso(d);
-      return { iso, weekday: WEEKDAY_LABELS[i], dateLabel: fmtDateShort(iso), isToday: iso === today };
+      return { iso, weekday: weekdayLabels[i], dateLabel: fmtDateShort(iso), isToday: iso === today };
     });
-  }, [base, today]);
+  }, [base, today, weekdayLabels]);
 
   const doctorLegend = staff.filter((s) => s.role === 'doctor');
 
@@ -73,11 +74,11 @@ export default function Appointments() {
   return (
     <div style={{ maxWidth: 1200 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Расписание приёмов</div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>{t('appointments.title')}</div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button onClick={() => setWeekOffset((w) => w - 1)} aria-label="Предыдущая неделя" style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>‹</button>
+          <button onClick={() => setWeekOffset((w) => w - 1)} aria-label={t('appointments.prevWeek')} style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>‹</button>
           <div style={{ fontSize: 13.5, color: '#374151', minWidth: 150, textAlign: 'center' }}>{fmtDateShort(weekDays[0]?.iso)} – {fmtDateShort(weekDays[6]?.iso)}</div>
-          <button onClick={() => setWeekOffset((w) => w + 1)} aria-label="Следующая неделя" style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>›</button>
+          <button onClick={() => setWeekOffset((w) => w + 1)} aria-label={t('appointments.nextWeek')} style={{ width: 32, height: 32, border: '1px solid #E5E7EB', background: 'white', borderRadius: 8, cursor: 'pointer' }}>›</button>
         </div>
       </div>
 
@@ -95,7 +96,7 @@ export default function Appointments() {
         {weekDays.map((day) => {
           const dayAppts = appts.filter((a) => a.date === day.iso).sort((a, b) => a.time.localeCompare(b.time));
           return (
-            <div key={day.iso} style={{ background: 'white', borderRadius: 14, border: day.isToday ? '1.5px solid #1D9E75' : '1px solid #EDF0EF', display: 'flex', flexDirection: 'column' }}>
+            <div key={day.iso} style={{ ...CARD_STYLE, border: day.isToday ? '1.5px solid #1D9E75' : CARD_STYLE.border, display: 'flex', flexDirection: 'column' }}>
               <div style={{ padding: '10px 12px', borderBottom: '1px solid #EDF0EF' }}>
                 <div style={{ fontSize: 11.5, color: '#9CA3AF', textTransform: 'uppercase' }}>{day.weekday}</div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: '#111827' }}>{day.dateLabel}</div>
@@ -111,7 +112,7 @@ export default function Appointments() {
                   onClick={() => { setBookingDay(day.iso); setBookingPatient(''); setBookingDoctor(''); setBookingTime(''); setBookingError(''); }}
                   style={{ marginTop: 'auto', padding: 6, background: '#FAFBFB', border: '1px dashed #D8DEDC', borderRadius: 8, fontSize: 11.5, color: '#6B7280', cursor: 'pointer' }}
                 >
-                  + Запись
+                  {t('appointments.addBooking')}
                 </button>
               </div>
             </div>
@@ -120,30 +121,30 @@ export default function Appointments() {
       </div>
 
       {bookingDay && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+        <div style={MODAL_OVERLAY_STYLE}>
           <div style={{ background: 'white', borderRadius: 16, padding: '26px 28px', width: 360, boxShadow: '0 24px 48px rgba(0,0,0,0.18)' }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>Новая запись — {fmtDateShort(bookingDay)}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>{t('appointments.newBookingTitle', { date: fmtDateShort(bookingDay) })}</div>
 
             <ErrorBanner message={bookingError} />
 
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 }}>Пациент</label>
+            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 }}>{t('appointments.fieldPatient')}</label>
             <select value={bookingPatient} onChange={(e) => setBookingPatient(e.target.value)} style={{ width: '100%', padding: '9px 10px', border: '1.5px solid #E5E7EB', borderRadius: 8, fontSize: 13.5, marginBottom: 12 }}>
-              <option value="">Выберите пациента</option>
+              <option value="">{t('appointments.choosePatient')}</option>
               {patients.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
             </select>
 
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 }}>Врач</label>
+            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 }}>{t('appointments.fieldDoctor')}</label>
             <select value={bookingDoctor} onChange={(e) => setBookingDoctor(e.target.value)} style={{ width: '100%', padding: '9px 10px', border: '1.5px solid #E5E7EB', borderRadius: 8, fontSize: 13.5, marginBottom: 12 }}>
-              <option value="">Выберите врача</option>
+              <option value="">{t('appointments.chooseDoctor')}</option>
               {doctorLegend.map((dl) => <option key={dl.id} value={dl.id}>{dl.name}</option>)}
             </select>
 
-            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 }}>Время</label>
+            <label style={{ display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 }}>{t('appointments.fieldTime')}</label>
             <input type="time" value={bookingTime} onChange={(e) => setBookingTime(e.target.value)} style={{ width: '100%', padding: '9px 10px', border: '1.5px solid #E5E7EB', borderRadius: 8, fontSize: 13.5, marginBottom: 18 }} />
 
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setBookingDay(null)} style={{ flex: 1, padding: 10, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13.5, cursor: 'pointer' }}>Отмена</button>
-              <button onClick={saveBooking} style={{ flex: 1, padding: 10, background: '#1D9E75', color: 'white', border: 'none', borderRadius: 8, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Записать</button>
+              <button onClick={() => setBookingDay(null)} style={{ ...SECONDARY_BUTTON_STYLE, flex: 1, padding: 10, borderRadius: 8, fontSize: 13.5 }}>{t('common.cancel')}</button>
+              <button onClick={saveBooking} style={{ ...PRIMARY_BUTTON_STYLE, flex: 1, padding: 10, borderRadius: 8, fontSize: 13.5 }}>{t('appointments.book')}</button>
             </div>
           </div>
         </div>

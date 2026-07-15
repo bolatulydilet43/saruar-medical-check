@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api.js';
-import { fmtDate } from '../theme.js';
+import { fmtDate, CARD_STYLE, MODAL_OVERLAY_STYLE, INPUT_STYLE, LABEL_STYLE, PRIMARY_BUTTON_STYLE, SECONDARY_BUTTON_STYLE } from '../theme.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 import ConfirmModal from '../components/ConfirmModal.jsx';
 import { exportPatientsExcel } from '../utils/exportPatientsExcel.js';
 
-const FILTERS = [
-  { id: 'all', label: 'Все' },
-  { id: 'green', label: 'Норма' },
-  { id: 'amber', label: 'Отклонение' },
-  { id: 'red', label: 'Внимание' },
-];
-
-const EMPTY_FORM = { name: '', age: '', gender: 'М', phone: '+77', checkIn: '', checkOut: '', allergies: '' };
+const EMPTY_FORM = { name: '', age: '', gender: 'М', phone: '+77', checkIn: '', checkOut: '', allergies: '', roomId: '' };
 const GRID_COLUMNS = '2.2fr 1fr 1.4fr 1.2fr 1.2fr 1.6fr';
 
 export default function Patients() {
+  const { t } = useTranslation();
+  const FILTERS = [
+    { id: 'all', label: t('patients.filterAll') },
+    { id: 'green', label: t('patients.filterGreen') },
+    { id: 'amber', label: t('patients.filterAmber') },
+    { id: 'red', label: t('patients.filterRed') },
+  ];
   const [patients, setPatients] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
@@ -41,6 +43,10 @@ export default function Patients() {
   useEffect(() => {
     reload();
   }, [query, filter]);
+
+  useEffect(() => {
+    if (canManage) api.getRooms().then(setRooms).catch(() => {});
+  }, [canManage]);
 
   const filterBtnStyle = (active) => ({
     padding: '9px 14px', borderRadius: 9, fontSize: 13, fontWeight: 600, cursor: 'pointer',
@@ -90,27 +96,24 @@ export default function Patients() {
     }
   }
 
-  const inputStyle = { width: '100%', padding: '10px 12px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, outline: 'none' };
-  const labelStyle = { display: 'block', fontSize: 12.5, fontWeight: 500, color: '#374151', marginBottom: 6 };
-
   return (
     <div style={{ maxWidth: 1200 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Пациенты</div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>{t('patients.title')}</div>
         <div style={{ display: 'flex', gap: 10 }}>
           <button
             onClick={handleExport}
             disabled={exporting}
             style={{ padding: '10px 16px', background: 'white', color: '#374151', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 13.5, fontWeight: 600, cursor: exporting ? 'default' : 'pointer', opacity: exporting ? 0.6 : 1 }}
           >
-            {exporting ? 'Экспорт…' : 'Экспорт в Excel'}
+            {exporting ? t('patients.exporting') : t('patients.exportButton')}
           </button>
           {canManage && (
             <button
               onClick={() => { setForm(EMPTY_FORM); setError(''); setShowForm(true); }}
-              style={{ padding: '10px 16px', background: '#1D9E75', color: 'white', border: 'none', borderRadius: 10, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}
+              style={{ ...PRIMARY_BUTTON_STYLE, padding: '10px 16px', borderRadius: 10, fontSize: 13.5 }}
             >
-              + Добавить пациента
+              {t('patients.addPatient')}
             </button>
           )}
         </div>
@@ -119,7 +122,7 @@ export default function Patients() {
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap' }}>
         <input
-          placeholder="Поиск по имени…" value={query} onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('patients.searchPlaceholder')} value={query} onChange={(e) => setQuery(e.target.value)}
           style={{ flex: 1, minWidth: 220, padding: '10px 14px', border: '1.5px solid #E5E7EB', borderRadius: 10, fontSize: 14, outline: 'none' }}
         />
         <div style={{ display: 'flex', gap: 6 }}>
@@ -131,46 +134,46 @@ export default function Patients() {
 
       <ErrorBanner message={loadError} onRetry={reload} />
 
-      <div style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', overflow: 'hidden' }}>
+      <div style={{ ...CARD_STYLE, borderRadius: 16, overflow: 'hidden' }}>
         <div style={{ display: 'grid', gridTemplateColumns: GRID_COLUMNS, gap: 12, padding: '14px 20px', background: '#FAFBFB', fontSize: 12.5, fontWeight: 600, color: '#6B7280', borderBottom: '1px solid #EDF0EF' }}>
-          <div>ФИО</div><div>Возраст/Пол</div><div>Заезд – Выезд</div><div>Посл. анализ</div><div>Статус</div><div></div>
+          <div>{t('patients.name')}</div><div>{t('patients.ageGenderCol')}</div><div>{t('patients.stayCol')}</div><div>{t('patients.lastAnalysisCol')}</div><div>{t('patients.statusCol')}</div><div></div>
         </div>
         {patients.map((p) => (
           <div key={p.id} style={{ display: 'grid', gridTemplateColumns: GRID_COLUMNS, gap: 12, padding: '16px 20px', borderBottom: '1px solid #F3F5F4', alignItems: 'center', fontSize: 14 }}>
             <div style={{ fontWeight: 600, color: '#111827' }}>{p.name}</div>
-            <div style={{ color: '#6B7280' }}>{p.age} лет, {p.gender}</div>
+            <div style={{ color: '#6B7280' }}>{t('common.ageGender', { age: p.age, gender: p.gender })}</div>
             <div style={{ color: '#6B7280' }}>{fmtDate(p.checkIn)} – {fmtDate(p.checkOut)}</div>
             <div style={{ color: '#6B7280' }}>{fmtDate(p.lastAnalysis)}</div>
             <div><StatusBadge status={p.status} /></div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => navigate(`/patients/${p.id}`)} style={{ padding: '7px 14px', background: '#F0F7F4', color: '#1D7A57', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Профиль</button>
+              <button onClick={() => navigate(`/patients/${p.id}`)} style={{ padding: '7px 14px', background: '#F0F7F4', color: '#1D7A57', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>{t('patients.profile')}</button>
               {canManage && (
-                <button onClick={() => setPendingDelete(p)} style={{ padding: '7px 14px', background: '#FDECEC', color: '#C0392B', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Удалить</button>
+                <button onClick={() => setPendingDelete(p)} style={{ padding: '7px 14px', background: '#FDECEC', color: '#C0392B', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>{t('common.delete')}</button>
               )}
             </div>
           </div>
         ))}
-        {patients.length === 0 && <div style={{ padding: 40, textAlign: 'center', color: '#9CA3AF', fontSize: 14 }}>Пациенты не найдены</div>}
+        {patients.length === 0 && <div style={{ padding: 40, textAlign: 'center', color: '#9CA3AF', fontSize: 14 }}>{t('patients.notFound')}</div>}
       </div>
 
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+        <div style={MODAL_OVERLAY_STYLE}>
           <form onSubmit={submitForm} style={{ background: 'white', borderRadius: 16, padding: '26px 28px', width: 420, boxShadow: '0 24px 48px rgba(0,0,0,0.18)' }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>Новый пациент</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 16 }}>{t('patients.newPatientTitle')}</div>
 
             <div style={{ marginBottom: 12 }}>
-              <label style={labelStyle}>ФИО</label>
-              <input required value={form.name} onChange={(e) => setField('name', e.target.value)} style={inputStyle} />
+              <label style={LABEL_STYLE}>{t('patients.name')}</label>
+              <input required value={form.name} onChange={(e) => setField('name', e.target.value)} style={INPUT_STYLE} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={labelStyle}>Возраст</label>
-                <input type="number" min="0" value={form.age} onChange={(e) => setField('age', e.target.value)} style={inputStyle} />
+                <label style={LABEL_STYLE}>{t('patients.age')}</label>
+                <input type="number" min="0" value={form.age} onChange={(e) => setField('age', e.target.value)} style={INPUT_STYLE} />
               </div>
               <div>
-                <label style={labelStyle}>Пол</label>
-                <select value={form.gender} onChange={(e) => setField('gender', e.target.value)} style={{ ...inputStyle, background: 'white' }}>
+                <label style={LABEL_STYLE}>{t('patients.gender')}</label>
+                <select value={form.gender} onChange={(e) => setField('gender', e.target.value)} style={{ ...INPUT_STYLE, background: 'white' }}>
                   <option value="М">М</option>
                   <option value="Ж">Ж</option>
                 </select>
@@ -179,30 +182,40 @@ export default function Patients() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
-                <label style={labelStyle}>Заезд</label>
-                <input required type="date" value={form.checkIn} onChange={(e) => setField('checkIn', e.target.value)} style={inputStyle} />
+                <label style={LABEL_STYLE}>{t('patients.checkIn')}</label>
+                <input required type="date" value={form.checkIn} onChange={(e) => setField('checkIn', e.target.value)} style={INPUT_STYLE} />
               </div>
               <div>
-                <label style={labelStyle}>Выезд</label>
-                <input required type="date" value={form.checkOut} onChange={(e) => setField('checkOut', e.target.value)} style={inputStyle} />
+                <label style={LABEL_STYLE}>{t('patients.checkOut')}</label>
+                <input required type="date" value={form.checkOut} onChange={(e) => setField('checkOut', e.target.value)} style={INPUT_STYLE} />
               </div>
             </div>
 
             <div style={{ marginBottom: 12 }}>
-              <label style={labelStyle}>Номер телефона</label>
-              <input type="tel" value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+7 700 123 45 67" style={inputStyle} />
+              <label style={LABEL_STYLE}>{t('patients.phone')}</label>
+              <input type="tel" value={form.phone} onChange={(e) => setField('phone', e.target.value)} placeholder="+7 700 123 45 67" style={INPUT_STYLE} />
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <label style={LABEL_STYLE}>{t('patients.allergies')}</label>
+              <input value={form.allergies} onChange={(e) => setField('allergies', e.target.value)} placeholder={t('patients.allergiesPlaceholder')} style={INPUT_STYLE} />
             </div>
 
             <div style={{ marginBottom: 18 }}>
-              <label style={labelStyle}>Аллергии</label>
-              <input value={form.allergies} onChange={(e) => setField('allergies', e.target.value)} placeholder="Нет данных" style={inputStyle} />
+              <label style={LABEL_STYLE}>{t('patients.room')}</label>
+              <select value={form.roomId} onChange={(e) => setField('roomId', e.target.value)} style={{ ...INPUT_STYLE, background: 'white' }}>
+                <option value="">{t('patients.noRoom')}</option>
+                {rooms.map((r) => (
+                  <option key={r.id} value={r.id}>№ {r.number}</option>
+                ))}
+              </select>
             </div>
 
             {error && <div style={{ color: '#C0392B', fontSize: 13, marginBottom: 12 }}>{error}</div>}
 
             <div style={{ display: 'flex', gap: 8 }}>
-              <button type="button" onClick={() => setShowForm(false)} style={{ flex: 1, padding: 10, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13.5, cursor: 'pointer' }}>Отмена</button>
-              <button type="submit" style={{ flex: 1, padding: 10, background: '#1D9E75', color: 'white', border: 'none', borderRadius: 8, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Добавить</button>
+              <button type="button" onClick={() => setShowForm(false)} style={{ ...SECONDARY_BUTTON_STYLE, flex: 1, padding: 10, borderRadius: 8, fontSize: 13.5 }}>{t('common.cancel')}</button>
+              <button type="submit" style={{ ...PRIMARY_BUTTON_STYLE, flex: 1, padding: 10, borderRadius: 8, fontSize: 13.5 }}>{t('patients.add')}</button>
             </div>
           </form>
         </div>
@@ -210,7 +223,7 @@ export default function Patients() {
 
       <ConfirmModal
         open={!!pendingDelete}
-        title={`Удалить пациента «${pendingDelete?.name}»? Это действие необратимо.`}
+        title={t('patients.deleteConfirm', { name: pendingDelete?.name })}
         onConfirm={confirmDelete}
         onCancel={() => setPendingDelete(null)}
       />

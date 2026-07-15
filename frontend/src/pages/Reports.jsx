@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api.js';
-import { fmtDate } from '../theme.js';
+import { fmtDate, CARD_STYLE, PRIMARY_BUTTON_STYLE } from '../theme.js';
 import { analysisSummaryText } from '../utils/analysisDisplay.js';
 import Logo from '../components/Logo.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
@@ -9,6 +10,7 @@ import { brand } from '../brandConfig.js';
 const TODAY_LABEL = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
 
 export default function Reports() {
+  const { t } = useTranslation();
   const [patients, setPatients] = useState([]);
   const [ranges, setRanges] = useState(null);
   const [patientId, setPatientId] = useState('');
@@ -35,7 +37,7 @@ export default function Reports() {
   }, [patientId]);
 
   if (error) return <ErrorBanner message={error} onRetry={loadList} />;
-  if (!patient || !ranges) return <div style={{ color: '#9CA3AF' }}>Загрузка…</div>;
+  if (!patient || !ranges) return <div style={{ color: '#9CA3AF' }}>{t('common.loading')}</div>;
 
   const latestDiagnosis = patient.diagnoses[0];
   const reportRows = patient.analyses.map((a) => ({ date: fmtDate(a.date), type: a.type, summary: analysisSummaryText(a, ranges) }));
@@ -44,16 +46,16 @@ export default function Reports() {
   return (
     <div style={{ maxWidth: 900 }}>
       <div data-noprint="1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>Отчёт</div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: '#111827' }}>{t('reports.title')}</div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <select value={patientId} onChange={(e) => setPatientId(e.target.value)} style={{ padding: '9px 12px', border: '1.5px solid #E5E7EB', borderRadius: 8, fontSize: 13.5 }}>
             {patients.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
-          <button onClick={() => window.print()} style={{ padding: '9px 18px', background: '#1D9E75', color: 'white', border: 'none', borderRadius: 8, fontSize: 13.5, fontWeight: 600, cursor: 'pointer' }}>Печать / PDF</button>
+          <button onClick={() => window.print()} style={{ ...PRIMARY_BUTTON_STYLE, padding: '9px 18px', borderRadius: 8, fontSize: 13.5 }}>{t('reports.printButton')}</button>
         </div>
       </div>
 
-      <div data-printarea="1" style={{ background: 'white', borderRadius: 16, border: '1px solid #EDF0EF', padding: '40px 44px' }}>
+      <div data-printarea="1" style={{ ...CARD_STYLE, borderRadius: 16, padding: '40px 44px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <div style={{ width: 30, height: 30, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Logo size={30} />
@@ -66,21 +68,21 @@ export default function Reports() {
           <div>{brand.phones}</div>
           <div>{brand.contacts}</div>
         </div>
-        <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, borderTop: '1px solid #EDF0EF', paddingTop: 14 }}>Медицинское заключение · сформировано {TODAY_LABEL}</div>
+        <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, borderTop: '1px solid #EDF0EF', paddingTop: 14 }}>{t('reports.reportSubtitle', { date: TODAY_LABEL })}</div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '10px 24px', fontSize: 13.5, color: '#374151', padding: '18px 20px', background: '#FAFBFB', borderRadius: 12, marginBottom: 26 }}>
-          <div><span style={{ color: '#9CA3AF' }}>Пациент:</span> {patient.name}</div>
-          <div><span style={{ color: '#9CA3AF' }}>Возраст/Пол:</span> {patient.age} лет, {patient.gender}</div>
-          <div><span style={{ color: '#9CA3AF' }}>Заезд:</span> {fmtDate(patient.checkIn)}</div>
-          <div><span style={{ color: '#9CA3AF' }}>Выезд:</span> {fmtDate(patient.checkOut)}</div>
-          {patient.phone && <div><span style={{ color: '#9CA3AF' }}>Телефон:</span> {patient.phone}</div>}
-          <div style={{ gridColumn: '1 / -1' }}><span style={{ color: '#9CA3AF' }}>Аллергии:</span> {patient.allergies}</div>
+          <div><span style={{ color: '#9CA3AF' }}>{t('reports.patientLabel')}</span> {patient.name}</div>
+          <div><span style={{ color: '#9CA3AF' }}>{t('reports.ageGenderLabel')}</span> {t('common.ageGender', { age: patient.age, gender: patient.gender })}</div>
+          <div><span style={{ color: '#9CA3AF' }}>{t('reports.checkInLabel')}</span> {fmtDate(patient.checkIn)}</div>
+          <div><span style={{ color: '#9CA3AF' }}>{t('reports.checkOutLabel')}</span> {fmtDate(patient.checkOut)}</div>
+          {patient.phone && <div><span style={{ color: '#9CA3AF' }}>{t('reports.phoneLabel')}</span> {patient.phone}</div>}
+          <div style={{ gridColumn: '1 / -1' }}><span style={{ color: '#9CA3AF' }}>{t('reports.allergiesLabel')}</span> {patient.allergies}</div>
         </div>
 
-        <div style={{ fontSize: 14.5, fontWeight: 700, color: '#111827', marginBottom: 10 }}>Результаты анализов</div>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color: '#111827', marginBottom: 10 }}>{t('reports.analysisResults')}</div>
         <div style={{ border: '1px solid #EDF0EF', borderRadius: 10, overflow: 'hidden', marginBottom: 26 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr 3fr', gap: 10, padding: '10px 14px', background: '#FAFBFB', fontSize: 12, fontWeight: 600, color: '#6B7280' }}>
-            <div>Дата</div><div>Тип</div><div>Результат</div>
+            <div>{t('reports.colDate')}</div><div>{t('reports.colType')}</div><div>{t('reports.colResult')}</div>
           </div>
           {reportRows.map((row, i) => (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr 3fr', gap: 10, padding: '11px 14px', borderTop: '1px solid #F3F5F4', fontSize: 13, color: '#374151' }}>
@@ -89,11 +91,11 @@ export default function Reports() {
           ))}
         </div>
 
-        <div style={{ fontSize: 14.5, fontWeight: 700, color: '#111827', marginBottom: 10 }}>Диагноз врача</div>
-        <div style={{ fontSize: 13.5, color: '#374151', marginBottom: 6 }}>{latestDiagnosis ? latestDiagnosis.text : 'Диагноз ещё не внесён.'}</div>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color: '#111827', marginBottom: 10 }}>{t('reports.doctorDiagnosis')}</div>
+        <div style={{ fontSize: 13.5, color: '#374151', marginBottom: 6 }}>{latestDiagnosis ? latestDiagnosis.text : t('reports.noDiagnosis')}</div>
         <div style={{ fontSize: 12.5, color: '#9CA3AF', marginBottom: 22 }}>{latestDiagnosis ? `${latestDiagnosis.doctor} · ${fmtDate(latestDiagnosis.date)}` : ''}</div>
 
-        <div style={{ fontSize: 14.5, fontWeight: 700, color: '#111827', marginBottom: 10 }}>Назначения</div>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color: '#111827', marginBottom: 10 }}>{t('reports.prescriptions')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 36 }}>
           {prescriptions.map((rx, i) => (
             <div key={i} style={{ display: 'flex', gap: 20, fontSize: 13.5, color: '#374151' }}>
@@ -103,12 +105,12 @@ export default function Reports() {
               <div>{rx.duration}</div>
             </div>
           ))}
-          {prescriptions.length === 0 && <div style={{ color: '#9CA3AF', fontSize: 13.5 }}>Назначений нет</div>}
+          {prescriptions.length === 0 && <div style={{ color: '#9CA3AF', fontSize: 13.5 }}>{t('reports.noPrescriptions')}</div>}
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid #EDF0EF', paddingTop: 20 }}>
-          <div style={{ fontSize: 13, color: '#374151' }}>Подпись врача: <span style={{ display: 'inline-block', width: 180, borderBottom: '1px solid #9CA3AF' }}>&nbsp;</span></div>
-          <div style={{ fontSize: 13, color: '#374151' }}>Дата: <span style={{ display: 'inline-block', width: 100, borderBottom: '1px solid #9CA3AF' }}>&nbsp;</span></div>
+          <div style={{ fontSize: 13, color: '#374151' }}>{t('reports.doctorSignature')} <span style={{ display: 'inline-block', width: 180, borderBottom: '1px solid #9CA3AF' }}>&nbsp;</span></div>
+          <div style={{ fontSize: 13, color: '#374151' }}>{t('reports.dateLabel')} <span style={{ display: 'inline-block', width: 100, borderBottom: '1px solid #9CA3AF' }}>&nbsp;</span></div>
         </div>
       </div>
     </div>
